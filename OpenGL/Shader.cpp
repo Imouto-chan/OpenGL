@@ -16,6 +16,7 @@ void Shader::Cleanup()
 void Shader::LoadAttributes()
 {
 	attrVertices = glGetAttribLocation(programID, "vertices"); // Get a handle for the vertex buffer
+	attrWVP = glGetUniformLocation(programID, "WVP"); // Get a to the WVP
 }
 
 void Shader::EvaluateShader(int _infoLength, GLuint _id)

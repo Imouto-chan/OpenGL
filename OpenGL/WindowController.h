@@ -16,6 +16,7 @@ public:
 
 	// Methods
 	void NewWindow();
+	Resolution GetResolution();
 
 private:
 	// Members

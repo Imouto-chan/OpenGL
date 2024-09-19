@@ -26,3 +26,9 @@ void WindowController::NewWindow()
 	if (window != nullptr)
 		glfwMakeContextCurrent(window);
 }
+
+Resolution WindowController::GetResolution()
+{
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	return Resolution(mode->width, mode->height, 45);
+}

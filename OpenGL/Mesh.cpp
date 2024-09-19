@@ -22,15 +22,18 @@ void Mesh::Create(Shader* _shader)
 void Mesh::Cleanup()
 {
 	glDeleteBuffers(1, &vertexBuffer);
+	vertexBuffer = 0;
 }
 
-void Mesh::Render()
+void Mesh::Render(glm::mat4 wvp)
 {
 	glUseProgram(shader->GetProgramID()); // Use our shader
 
 	// 1st attribute buffer : vertices
 	glEnableVertexAttribArray(shader->GetAttrVertices());
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	wvp *= world;
+	glUniformMatrix4fv(shader->GetAttrWVP(), 1, FALSE, &wvp[0][0]);
 	glVertexAttribPointer(
 		shader->GetAttrVertices(),			// Match the layout in the shader
 		3			/*size*/,
