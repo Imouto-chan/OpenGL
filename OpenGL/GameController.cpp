@@ -8,7 +8,7 @@ void GameController::Initialize()
 	M_ASSERT(glewInit() == GLEW_OK, "Failed to initialize GLEW."); // Initialize GLEW
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue background
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black background
 
 	resolutions[0] = Resolution(1200, 800, 45);
 	resolutions[1] = Resolution(800, 800, 45);
