@@ -7,18 +7,23 @@ class Camera
 {
 public:
 	Camera() = default;
-	Camera(Resolution _resolution);
+	Camera(const Resolution &_resolution, const float _near = 0.1f, const float _far = 1000.0f);
 	virtual ~Camera() = default;
 
-	void SetResolution(Resolution _resolution);
+	void LookAt(const glm::vec3& _position, const glm::vec3& _lookAt, const glm::vec3& _up)
+	{
+		view = glm::lookAt(_position, _lookAt, _up);
+	}
+
+	void SetResolution(const Resolution& _resolution, const float _near, const float _far);
 	glm::mat4 GetProjection() { return projection; }
 	glm::mat4 GetView() { return view; }
-	void SetWorldSpace(glm::vec3 _worldSpace);
+	//void SetWorldSpace(glm::vec3 _worldSpace);
 
 private:
 	glm::mat4 projection = {};
 	glm::mat4 view = {};
-	glm::vec3 worldSpace = glm::vec3(4, 3, 3);
+	//glm::vec3 worldSpace = glm::vec3(4, 3, 3);
 };
 
 #endif // CAMERA_H

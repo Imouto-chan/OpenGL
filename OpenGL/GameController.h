@@ -18,8 +18,7 @@ public:
 private:
 	Shader shader = {};
 	Mesh mesh = {};
-	Camera camera[3];
-	Resolution resolutions[3];
+	Camera camera = {};
 };
 
 #endif // GAME_CONTROLLER_H

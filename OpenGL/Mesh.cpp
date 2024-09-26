@@ -14,16 +14,28 @@ void Mesh::Create(Shader* _shader)
 	shader = _shader;
 
 	//m_vertexData = { -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+	//m_vertexData = {
+	//	/* Position */		 /* RGBA Color */
+	//	0.2f, 0.2f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
+	//	0.3f, 0.9f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f,
+	//	0.4f, 0.5f, 0.0f,	 0.0f, 0.0f, 1.0f, 1.0f,
+	//	0.7f, 0.8f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
+	//	0.8f, 0.0f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f,
+	//	1.0f, 0.6f, 0.0f,	 0.0f, 0.0f, 1.0f, 1.0f,
+	//	1.0f, 0.2f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
+	//	1.5f, 0.6f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f
+	//};
+
 	m_vertexData = {
 		/* Position */		 /* RGBA Color */
-		0.2f, 0.2f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
-		0.3f, 0.9f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f,
-		0.4f, 0.5f, 0.0f,	 0.0f, 0.0f, 1.0f, 1.0f,
-		0.7f, 0.8f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
-		0.8f, 0.0f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 0.6f, 0.0f,	 0.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, 0.2f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
-		1.5f, 0.6f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f
+		20.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
+		30.0f, 90.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
+		40.0f, 50.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
+		70.0f, 80.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
+		80.0f, 40.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
+		100.0f, 60.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
+		100.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
+		150.0f, 60.0f, 0.0f,	0.0f, 1.0f, 0.0f, 1.0f
 	};
 
 	glGenBuffers(1, &vertexBuffer);
@@ -68,7 +80,7 @@ void Mesh::Render(glm::mat4 wvp)
 
 	// Draw the triangle
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 7); // Starting from vertex 0; 3 vertices total -> 1 triangle
+	glDrawArrays(GL_LINES, 0, m_vertexData.size() / 7); // Starting from vertex 0; 3 vertices total -> 1 triangle
 	glDisableVertexAttribArray(shader->GetAttrVertices());
 	glDisableVertexAttribArray(shader->GetAttrColors());
 }
