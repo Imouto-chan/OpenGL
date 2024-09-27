@@ -7,6 +7,10 @@ Mesh::~Mesh()
 	{
 		glDeleteBuffers(1, &vertexBuffer);
 	}
+	if (indexBuffer != 0)
+	{
+		glDeleteBuffers(1, &indexBuffer);
+	}
 }
 
 void Mesh::Create(Shader* _shader)
@@ -26,33 +30,68 @@ void Mesh::Create(Shader* _shader)
 	//	1.5f, 0.6f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f
 	//};
 
+	//m_vertexData = {
+	//	/* Position */		 /* RGBA Color */
+	//	20.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
+	//	30.0f, 90.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
+	//	40.0f, 50.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
+	//	70.0f, 80.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
+	//	80.0f, 40.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
+	//	100.0f, 60.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
+	//	100.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
+	//	150.0f, 60.0f, 0.0f,	0.0f, 1.0f, 0.0f, 1.0f
+	//};
+
+	// Default values to reuse
+	float a = 26.0f;
+	float b = 42.0f;
+
 	m_vertexData = {
 		/* Position */		 /* RGBA Color */
-		20.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
-		30.0f, 90.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
-		40.0f, 50.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
-		70.0f, 80.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
-		80.0f, 40.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
-		100.0f, 60.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
-		100.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
-		150.0f, 60.0f, 0.0f,	0.0f, 1.0f, 0.0f, 1.0f
+		-a, 0.0f, b,	1.0f, 0.0f, 0.0f, 1.0f, // Red
+		a, 0.0f, b,		1.0f, 0.549f, 0.0f, 1.0f, // Orange
+		-a, 0.0f, b, 	1.0f, 1.0f, 0.0f, 1.0f, // Yellow
+		a, 0.0f, -b, 	1.0f, 1.0f, 0.0f, 1.0f, // Green
+		0.0f, b, a, 	0.0f, 0.0f, 1.0f, 1.0f,// Blue
+		0.0f, b, -a, 	0.294f, 0.0f, 0.51f, 1.0f, // Indigo
+		0.0f, -b, a, 	0.502f, 0.0f, 0.502f, 1.0f, // Purple
+		0.0f, -b, -a, 	1.0f, 1.0f, 1.0f, 1.0f, //White
+		b, a, 0.0f, 	0.0f, 1.0f, 1.0f, 1.0f, // Cyan
+		-b, a, 0.0f, 	0.0f, 0.0f, 0.0f, 1.0f, // Black
+		b, -a, 0.0f, 	0.118f, 0.565f, 1.0f, 1.0f, // Dodger blue
+		-b, -a, 0.0f, 	0.863f, 0.078f, 0.235f, 1.0f // Crimson
 	};
 
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(float), m_vertexData.data(), GL_STATIC_DRAW);
+
+	m_indexData = {
+		0, 6, 1, 0, 11, 6, 1, 4, 0, 1, 8, 4,
+		1, 10, 8, 2, 5, 3, 2, 9, 5, 2, 11, 9,
+		3, 7, 2, 3, 10, 7, 4, 8, 5, 4, 9, 0,
+		5, 8, 3, 5, 9, 4, 6, 10, 1, 6, 11, 7,
+		7, 10, 6, 7, 11, 2, 8, 10, 3, 9, 11, 0
+	};
+
+	glGenBuffers(1, &indexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, indexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, m_indexData.size() * sizeof(float), m_indexData.data(), GL_STATIC_DRAW);
 }
 
 void Mesh::Cleanup()
 {
 	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteBuffers(1, &indexBuffer);
 	vertexBuffer = 0;
+	indexBuffer = 0;
 }
 
 void Mesh::Render(glm::mat4 wvp)
 {
 	glUseProgram(shader->GetProgramID()); // Use our shader
 
+	world = glm::rotate(world, 0.01f, { 0, 1, 0 });
 	// Set the world view project attribute
 	wvp *= world;
 	glUniformMatrix4fv(shader->GetAttrWVP(), 1, FALSE, &wvp[0][0]);
@@ -80,7 +119,9 @@ void Mesh::Render(glm::mat4 wvp)
 
 	// Draw the triangle
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glDrawArrays(GL_LINES, 0, m_vertexData.size() / 7); // Starting from vertex 0; 3 vertices total -> 1 triangle
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	//glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 7); // Starting from vertex 0; 3 vertices total -> 1 triangle
+	glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0); // Draw based off index data
 	glDisableVertexAttribArray(shader->GetAttrVertices());
 	glDisableVertexAttribArray(shader->GetAttrColors());
 }

@@ -47,6 +47,8 @@ void GameController::RunGame()
 		loc = glGetUniformLocation(shader.GetProgramID(), "RenderBlueChannel");
 		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderBlueChannel);
 
+
+
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
 		mesh.Render(camera.GetProjection() * camera.GetView());
 		glfwSwapBuffers(win); // Swap the front and back buffers

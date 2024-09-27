@@ -18,7 +18,9 @@ public:
 private:
 	Shader* shader = nullptr;
 	GLuint vertexBuffer;
+	GLuint indexBuffer = 0;
 	std::vector<GLfloat> m_vertexData;
+	std::vector<GLubyte> m_indexData;
 	glm::mat4 world = glm::mat4(1);
 };
 
