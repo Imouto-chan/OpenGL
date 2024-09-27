@@ -50,7 +50,7 @@ void Mesh::Create(Shader* _shader)
 		/* Position */		 /* RGBA Color */
 		-a, 0.0f, b,	1.0f, 0.0f, 0.0f, 1.0f, // Red
 		a, 0.0f, b,		1.0f, 0.549f, 0.0f, 1.0f, // Orange
-		-a, 0.0f, b, 	1.0f, 1.0f, 0.0f, 1.0f, // Yellow
+		-a, 0.0f, -b, 	1.0f, 1.0f, 0.0f, 1.0f, // Yellow
 		a, 0.0f, -b, 	1.0f, 1.0f, 0.0f, 1.0f, // Green
 		0.0f, b, a, 	0.0f, 0.0f, 1.0f, 1.0f,// Blue
 		0.0f, b, -a, 	0.294f, 0.0f, 0.51f, 1.0f, // Indigo
