@@ -50,7 +50,7 @@ void Mesh::Create(Shader* _shader)
 		/* Position */		 /* RGBA Color */
 		-a, 0.0f, b,	1.0f, 0.0f, 0.0f, 1.0f, // Red
 		a, 0.0f, b,		1.0f, 0.549f, 0.0f, 1.0f, // Orange
-		-a, 0.0f, b, 	1.0f, 1.0f, 0.0f, 1.0f, // Yellow
+		-a, 0.0f, -b, 	1.0f, 1.0f, 0.0f, 1.0f, // Yellow
 		a, 0.0f, -b, 	1.0f, 1.0f, 0.0f, 1.0f, // Green
 		0.0f, b, a, 	0.0f, 0.0f, 1.0f, 1.0f,// Blue
 		0.0f, b, -a, 	0.294f, 0.0f, 0.51f, 1.0f, // Indigo
@@ -91,7 +91,7 @@ void Mesh::Render(glm::mat4 wvp)
 {
 	glUseProgram(shader->GetProgramID()); // Use our shader
 
-	world = glm::rotate(world, 0.01f, { 0, 1, 0 });
+	//world = glm::rotate(world, 0.01f, { 0, 1, 0 });
 	// Set the world view project attribute
 	wvp *= world;
 	glUniformMatrix4fv(shader->GetAttrWVP(), 1, FALSE, &wvp[0][0]);

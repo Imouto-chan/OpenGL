@@ -30,8 +30,8 @@ void GameController::RunGame()
 
 	int curCamera = 0;
 	int curResolution = 0;
-	bool v_pressed = false; // to make sure the key is lifted before being reactivated
-	bool c_pressed = false;
+	glm::mat4 vp;
+	glm::mat4 world = glm::mat4(1);
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
@@ -50,7 +50,34 @@ void GameController::RunGame()
 
 
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
-		mesh.Render(camera.GetProjection() * camera.GetView());
+		vp = camera.GetProjection() * camera.GetView();
+
+		// Select rotation
+		if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) // A was pressed
+		{
+			world = glm::rotate(world, 0.01f, { 0, 1, 0 });
+		}
+
+		if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) // D was pressed
+		{
+			world = glm::rotate(world, 0.01f, { 0, -1, 0 });
+		}
+
+		if (glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS) // W was pressed
+		{
+			world = glm::rotate(world, 0.01f, { 1, 0, 0 });
+		}
+
+		if (glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS) // S was pressed
+		{
+			world = glm::rotate(world, 0.01f, { -1, 0, 0 });
+		}
+
+		//world *= glm::scale(world, { 2, 2, 2 });
+
+		vp *= world;
+		vp = glm::scale(vp, {fmod(glfwGetTime(),2.0),fmod(glfwGetTime(),2.0),fmod(glfwGetTime(),2.0) });
+		mesh.Render(vp);
 		glfwSwapBuffers(win); // Swap the front and back buffers
 		glfwPollEvents();
 
