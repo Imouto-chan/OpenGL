@@ -17,6 +17,8 @@ void Shader::LoadAttributes()
 {
 	attrVertices = glGetAttribLocation(programID, "vertices"); // Get a handle for the vertex buffer
 	attrColors = glGetAttribLocation(programID, "colors"); // Get a handle for the colors buffer
+	attrTexCoords = glGetAttribLocation(programID, "texCoords"); // Get a handle for the texture coords buffer
+	sampler1 = glGetAttribLocation(programID, "sampler1"); // Get a handle for the texture sampler 1
 	attrWVP = glGetUniformLocation(programID, "WVP"); // Get a to the WVP
 }
 

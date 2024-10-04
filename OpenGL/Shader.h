@@ -12,6 +12,8 @@ public:
 	GLuint GetProgramID() { return programID; }
 	GLuint GetAttrVertices() { return attrVertices; }
 	GLuint GetAttrColors() { return attrColors; }
+	GLuint GetAttrTexCoords() { return attrTexCoords; }
+	GLuint GetSampler1() { return sampler1; }
 	GLuint GetAttrWVP() { return attrWVP; }
 
 	void LoadShaders(const char* _vertexFilePath, const char* _fragmentFilePath);
@@ -26,6 +28,8 @@ private:
 	GLuint programID = 0; // ID of out shader program
 	GLuint attrVertices = 0; // Handle for the attribute vertex buffer
 	GLuint attrColors = 0; // Handle for the attribute color
+	GLuint attrTexCoords = 0; // Handle for the attribute tex coords
+	GLuint sampler1 = 0; // Handle for the attribute sampler 1
 	GLuint attrWVP = 0;
 	GLint result = GL_FALSE;
 	int infoLogLength = 0;
