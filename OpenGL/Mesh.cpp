@@ -13,6 +13,7 @@ Mesh::~Mesh()
 	}
 
 	texture.Cleanup();
+	texture2.Cleanup();
 }
 
 void Mesh::Create(Shader* _shader)
@@ -20,6 +21,9 @@ void Mesh::Create(Shader* _shader)
 	shader = _shader;
 	texture = Texture();
 	texture.LoadTexture("../Assets/Textures/Tacos.jpg");
+
+	texture2 = Texture();
+	texture2.LoadTexture("../Assets/Textures/Pattern.png");
 
 	//m_vertexData = { -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
 	//m_vertexData = {
@@ -100,6 +104,7 @@ void Mesh::Cleanup()
 	glDeleteBuffers(1, &vertexBuffer);
 	glDeleteBuffers(1, &indexBuffer);
 	texture.Cleanup();
+	texture2.Cleanup();
 
 	vertexBuffer = 0;
 	indexBuffer = 0;
@@ -149,6 +154,10 @@ void Mesh::Render(glm::mat4 wvp)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.GetTexture()); // Bind the texture
 	glUniform1i(shader->GetSampler1(), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture2.GetTexture()); // Bind the texture
+	glUniform1i(shader->GetSampler2(), 1);
 
 	// Draw the triangle
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);

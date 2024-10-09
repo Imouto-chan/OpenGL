@@ -14,6 +14,7 @@ public:
 	GLuint GetAttrColors() { return attrColors; }
 	GLuint GetAttrTexCoords() { return attrTexCoords; }
 	GLuint GetSampler1() { return sampler1; }
+	GLuint GetSampler2() { return sampler2; }
 	GLuint GetAttrWVP() { return attrWVP; }
 
 	void LoadShaders(const char* _vertexFilePath, const char* _fragmentFilePath);
@@ -30,6 +31,7 @@ private:
 	GLuint attrColors = 0; // Handle for the attribute color
 	GLuint attrTexCoords = 0; // Handle for the attribute tex coords
 	GLuint sampler1 = 0; // Handle for the attribute sampler 1
+	GLuint sampler2 = 0; // Handle for the attribute sampler 2
 	GLuint attrWVP = 0;
 	GLint result = GL_FALSE;
 	int infoLogLength = 0;
