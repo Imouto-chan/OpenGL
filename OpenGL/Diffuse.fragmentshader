@@ -5,12 +5,17 @@ in vec2 retTexCoord; // out variable from the vertex shader
 
 out vec4 FragColor;
 
+uniform vec3 LightDirection;
+uniform vec3 LightColor;
+uniform vec3 AmbientLight;
 uniform vec3 DiffuseColor;
 uniform sampler2D sampler1;
 uniform sampler2D sampler2;
 
 void main()
 {
-	// Texture and diffuse color
-	FragColor = vec4(DiffuseColor, 1.0f) * texture(sampler1, retTexCoord);
+	vec3 lightDir = normalize(LightDirection); // Normalize, for correct dot product results
+	vec3 lambertian = dot(lightDir, retNormal) * LightColor; // Add lambertian lighting
+	vec3 outColor = clamp(lambertian + AmbientLight, 0.0f, 1.0f) * DiffuseColor;
+	FragColor = vec4(outColor, 1.0f) * texture(sampler1, retTexCoord); // Calculate final color
 }
