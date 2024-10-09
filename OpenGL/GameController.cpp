@@ -1,6 +1,8 @@
 #include "GameController.h"
 #include "WindowController.h"
-#include "ToolWindow.h"
+#ifdef USE_TOOL_WINDOW
+	#include "ToolWindow.h"
+#endif
 
 void GameController::Initialize()
 {
@@ -9,21 +11,23 @@ void GameController::Initialize()
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black background
-	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 
 	camera = Camera(WindowController::GetInstance().GetResolution());
-	camera.LookAt({ 100, 100, 100 }, { 0,0,0 }, { 0,1,0 });
+	camera.LookAt({ 2, 2, 2 }, { 0,0,0 }, { 0,1,0 });
 	//glfwSetWindowSize(WindowController::GetInstance().GetWindow(), resolutions[0].width, resolutions[0].height);
 }
 
 void GameController::RunGame()
 {
+#ifdef USE_TOOL_WINDOW
 	// Show the C++/CLI tool window
 	OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
 	window->Show();
+#endif
 
 	shader = Shader();
-	shader.LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+	shader.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
 
 	mesh = Mesh();
 	mesh.Create(&shader);
@@ -36,6 +40,7 @@ void GameController::RunGame()
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
 	{
+#ifdef USE_TOOL_WINDOW
 		// Winform stuff
 		System::Windows::Forms::Application::DoEvents(); // Handle C++/CLI form events
 
@@ -46,10 +51,11 @@ void GameController::RunGame()
 		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderGreenChannel);
 		loc = glGetUniformLocation(shader.GetProgramID(), "RenderBlueChannel");
 		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderBlueChannel);
+#endif
 
 
 
-		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and dept buffer
 		mesh.Render(camera.GetProjection() * camera.GetView());
 		glfwSwapBuffers(win); // Swap the front and back buffers
 		glfwPollEvents();

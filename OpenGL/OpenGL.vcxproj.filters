@@ -85,5 +85,11 @@
     <None Include="SimpleVertexShader.vertexshader">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Diffuse.fragmentshader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Diffuse.vertexshader">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

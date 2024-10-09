@@ -70,12 +70,52 @@ void Mesh::Create(Shader* _shader)
 	//	-b, -a, 0.0f, 	0.863f, 0.078f, 0.235f, 1.0f // Crimson
 	//};
 
+	//m_vertexData = {
+	//	/*Position*/			/*RGB Color*/
+	//	50.0f, 50.0f, 0.0f,		1.0f, 0.0f, 0.0f,	1.0f, 1.0f, // Top=right
+	//	50.0f, -50.0f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f, // Bottom-right
+	//	-50.0f, -50.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 0.0f, // Bottom-left
+	//	-50.0f, 50.0f, 0.0f,	1.0f, 1.0f, 1.0f,	0.0f, 1.0f // Top-left
+	//};
+
 	m_vertexData = {
-		/*Position*/			/*RGB Color*/
-		50.0f, 50.0f, 0.0f,		1.0f, 0.0f, 0.0f,	1.0f, 1.0f, // Top=right
-		50.0f, -50.0f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f, // Bottom-right
-		-50.0f, -50.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 0.0f, // Bottom-left
-		-50.0f, 50.0f, 0.0f,	1.0f, 1.0f, 1.0f,	0.0f, 1.0f // Top-left
+		/* Position */ /* Normals */ /* Texture Coords */
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+		0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+		-0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		-0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+		0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
 	};
 
 	glGenBuffers(1, &vertexBuffer);
@@ -90,13 +130,13 @@ void Mesh::Create(Shader* _shader)
 	//	7, 10, 6, 7, 11, 2, 8, 10, 3, 9, 11, 0
 	//};
 
-	m_indexData = {
+	/*m_indexData = {
 		2, 0, 3, 2, 1, 0
 	};
 
 	glGenBuffers(1, &indexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, indexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_indexData.size() * sizeof(float), m_indexData.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_indexData.size() * sizeof(float), m_indexData.data(), GL_STATIC_DRAW);*/
 }
 
 void Mesh::Cleanup()
@@ -130,14 +170,21 @@ void Mesh::Render(glm::mat4 wvp)
 		(void*)0	/*offset*/);
 
 	// Set the Colors attribute buffer
-	glEnableVertexAttribArray(shader->GetAttrColors());
-	glVertexAttribPointer(
-		shader->GetAttrColors(),	//
-		4,							// size
-		GL_FLOAT,					// type
-		GL_FALSE,					// normalized?
-		8 * sizeof(float),			// stride (8 floats per vertex definition)
-		(void*)(3 * sizeof(float))	// array buffer offset
+	//glEnableVertexAttribArray(shader->GetAttrColors());
+	//glVertexAttribPointer(
+	//	shader->GetAttrColors(),	//
+	//	4,							// size
+	//	GL_FLOAT,					// type
+	//	GL_FALSE,					// normalized?
+	//	8 * sizeof(float),			// stride (8 floats per vertex definition)
+	//	(void*)(3 * sizeof(float))	// array buffer offset
+	//);
+
+	glEnableVertexAttribArray(shader->GetAttrNormals());
+	glVertexAttribPointer(shader->GetAttrNormals(),
+		3, GL_FLOAT, GL_FALSE,	// size, type, normalized?
+		8 * sizeof(float),		// stride (8 floats per vertex definition)
+		(void*)(3 * sizeof(float)) // array buffer offset
 	);
 
 	// Tex
@@ -161,10 +208,12 @@ void Mesh::Render(glm::mat4 wvp)
 
 	// Draw the triangle
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 	//glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 7); // Starting from vertex 0; 3 vertices total -> 1 triangle
-	glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0); // Draw based off index data
+	//glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0); // Draw based off index data
+	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8);
 	glDisableVertexAttribArray(shader->GetAttrVertices());
-	glDisableVertexAttribArray(shader->GetAttrColors());
+	//glDisableVertexAttribArray(shader->GetAttrColors());
+	glDisableVertexAttribArray(shader->GetAttrNormals());
 	glDisableVertexAttribArray(shader->GetAttrTexCoords());
 }
