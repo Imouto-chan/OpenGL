@@ -154,7 +154,10 @@ void Mesh::Render(glm::mat4 wvp)
 {
 	glUseProgram(shader->GetProgramID()); // Use our shader
 
-	world = glm::rotate(world, 0.01f, { 0, 1, 0 });
+	// Set the DiffuseColor
+	shader->SetVec3("DiffuseColor", { 1.0f, 0.0f, 0.0f });
+
+	world = glm::rotate(world, 0.005f, { 0, 1, 0 });
 	// Set the world view project attribute
 	wvp *= world;
 	glUniformMatrix4fv(shader->GetAttrWVP(), 1, FALSE, &wvp[0][0]);
