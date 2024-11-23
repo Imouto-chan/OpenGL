@@ -150,22 +150,45 @@ void Mesh::Cleanup()
 	indexBuffer = 0;
 }
 
-void Mesh::Render(glm::mat4 wvp)
+void Mesh::CalculateTransform()
+{
+	// Remember Matrix math is right to left so you read it bottom up
+	// If we write this we get: world = T * R(Yaw, Pitch, Roll) * S
+	world = glm::translate(glm::mat4(1.0f), position);
+	world = glm::rotate(world, rotation.y, glm::vec3(0, 1, 0)); // Yaw
+	world = glm::rotate(world, rotation.x, glm::vec3(1, 0, 0)); // Pitch
+	world = glm::rotate(world, rotation.z, glm::vec3(0, 0, 1)); // Roll
+	world = glm::scale(world, scale);
+}
+
+void Mesh::SetShaderVariables(glm::mat4 _pv)
+{
+	shader->SetMat4("World", world);
+	shader->SetVec3("AmbientLight", {0.1f, 0.1f, 0.1f});
+	shader->SetVec3("DiffuseColor", {1.0f, 1.0f, 1.0f});
+	shader->SetVec3("LightPosition", lightPosition);
+	shader->SetVec3("LightColor", lightColor);
+	shader->SetMat4("WVP", _pv * world);
+}
+
+void Mesh::Render(glm::mat4 _pv)
 {
 	glUseProgram(shader->GetProgramID()); // Use our shader
 
-	// Set the DiffuseColor
-	shader->SetVec3("AmbientLight", { 0.1f, 0.1f, 0.1f });
-	shader->SetVec3("DiffuseColor", { 1.0f, 1.0f, 1.0f });
-	shader->SetVec3("LightDirection", { 1.0f, 0.5f, 0.0f });
-	shader->SetVec3("LightColor", { 0.3f, 1.0f, 0.3f });
+	rotation.y += 0.005f;
 
-	world = glm::rotate(world, 0.005f, { 0, 1, 0 });
-	// Set the world view project attribute
-	wvp *= world;
-	glUniformMatrix4fv(shader->GetAttrWVP(), 1, FALSE, &wvp[0][0]);
+	CalculateTransform();
+	SetShaderVariables(_pv);
+	BindAttributes();
 
-	// 1st attribute buffer : vertices
+	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8);
+	glDisableVertexAttribArray(shader->GetAttrVertices());
+	glDisableVertexAttribArray(shader->GetAttrNormals());
+	glDisableVertexAttribArray(shader->GetAttrTexCoords());
+}
+
+void Mesh::BindAttributes()
+{
 	glEnableVertexAttribArray(shader->GetAttrVertices());
 	glVertexAttribPointer(
 		shader->GetAttrVertices(),			// Match the layout in the shader
@@ -174,17 +197,7 @@ void Mesh::Render(glm::mat4 wvp)
 		GL_FALSE	/*normalized*/,
 		8 * sizeof(float)			/*stride (8 floats per vertex definition)*/,
 		(void*)0	/*offset*/);
-
-	// Set the Colors attribute buffer
-	//glEnableVertexAttribArray(shader->GetAttrColors());
-	//glVertexAttribPointer(
-	//	shader->GetAttrColors(),	//
-	//	4,							// size
-	//	GL_FLOAT,					// type
-	//	GL_FALSE,					// normalized?
-	//	8 * sizeof(float),			// stride (8 floats per vertex definition)
-	//	(void*)(3 * sizeof(float))	// array buffer offset
-	//);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
 	glEnableVertexAttribArray(shader->GetAttrNormals());
 	glVertexAttribPointer(shader->GetAttrNormals(),
@@ -196,13 +209,15 @@ void Mesh::Render(glm::mat4 wvp)
 	// Tex
 	glEnableVertexAttribArray(shader->GetAttrTexCoords());
 	glVertexAttribPointer(
-		shader->GetAttrTexCoords(),	
+		shader->GetAttrTexCoords(),
 		2,							// size
 		GL_FLOAT,					// type
 		GL_FALSE,					// normalized
 		8 * sizeof(float),			// stride (8 floats per vertex definition)
 		(void*)(6 * sizeof(float))	// array buffer offset
 	);
+
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.GetTexture()); // Bind the texture
@@ -211,15 +226,4 @@ void Mesh::Render(glm::mat4 wvp)
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture2.GetTexture()); // Bind the texture
 	glUniform1i(shader->GetSampler2(), 1);
-
-	// Draw the triangle
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	//glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 7); // Starting from vertex 0; 3 vertices total -> 1 triangle
-	//glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0); // Draw based off index data
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8);
-	glDisableVertexAttribArray(shader->GetAttrVertices());
-	//glDisableVertexAttribArray(shader->GetAttrColors());
-	glDisableVertexAttribArray(shader->GetAttrNormals());
-	glDisableVertexAttribArray(shader->GetAttrTexCoords());
 }

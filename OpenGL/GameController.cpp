@@ -26,16 +26,22 @@ void GameController::RunGame()
 	window->Show();
 #endif
 
-	shader = Shader();
-	shader.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
+	shaderColor = Shader();
+	shaderColor.LoadShaders("Color.vertexshader", "Color.fragmentshader");
 
-	mesh = Mesh();
-	mesh.Create(&shader);
+	shaderDiffuse = Shader();
+	shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
+	//shaderDiffuse.LoadShaders("Color.vertexshader", "Color.fragmentshader");
 
-	int curCamera = 0;
-	int curResolution = 0;
-	bool v_pressed = false; // to make sure the key is lifted before being reactivated
-	bool c_pressed = false;
+	meshLight = Mesh();
+	meshLight.Create(&shaderColor);
+	meshLight.SetPosition({ 1.0f, 0.5f, 0.5f });
+	meshLight.SetScale({ 0.1f, 0.1f, 0.1f });
+
+	meshBox = Mesh();
+	meshBox.Create(&shaderDiffuse);
+	meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
+	meshBox.SetLightPosition(meshLight.GetPosition());
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
@@ -56,13 +62,16 @@ void GameController::RunGame()
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and dept buffer
-		mesh.Render(camera.GetProjection() * camera.GetView());
+		meshLight.Render(camera.GetProjection() * camera.GetView());
+		meshBox.Render(camera.GetProjection() * camera.GetView());
 		glfwSwapBuffers(win); // Swap the front and back buffers
 		glfwPollEvents();
 
 	} while (glfwGetKey(win, GLFW_KEY_ESCAPE) != GLFW_PRESS && // Check if the ESC Key was pressed
 		glfwWindowShouldClose(win) == 0); // Check if the window was closed
 
-	mesh.Cleanup();
-	shader.Cleanup();
+	meshLight.Cleanup();
+	meshBox.Cleanup();
+	shaderDiffuse.Cleanup();
+	shaderColor.Cleanup();
 }

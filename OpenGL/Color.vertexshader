@@ -1,0 +1,13 @@
+#version 330 // OpenGL version 3.3 (minimum requirement)
+
+in vec3 vertices; // Value sent from application to this attribute
+in vec3 normals;	// Normals for the vertices
+in vec2 texCoords; // Input texture coordinates
+
+uniform mat4 World; // Object Transform (Position, Rotation, Scale)
+uniform mat4 WVP;	// Now only a View Projection matrix
+
+void main()
+{
+	gl_Position = WVP * vec4(vertices, 1.0); // Transform the model to screen projection
+}

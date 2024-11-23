@@ -16,9 +16,13 @@ public:
 	void RunGame();
 
 private:
-	Shader shader = {};
-	Mesh mesh = {};
 	Camera camera = {};
+
+	Shader shaderColor = {};
+	Shader shaderDiffuse = {};
+
+	Mesh meshBox = {};
+	Mesh meshLight = {};
 };
 
 #endif // GAME_CONTROLLER_H

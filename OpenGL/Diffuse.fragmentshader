@@ -1,10 +1,12 @@
 #version 330 // OpenGL version 3.3 (minimum requirement)
 
+in vec3 retFragPos;
 in vec3 retNormal; // MUST use the same name as the out variable used by the vertex shader
 in vec2 retTexCoord; // out variable from the vertex shader
 
 out vec4 FragColor;
 
+uniform vec3 LightPosition;
 uniform vec3 LightDirection;
 uniform vec3 LightColor;
 uniform vec3 AmbientLight;
@@ -14,7 +16,7 @@ uniform sampler2D sampler2;
 
 void main()
 {
-	vec3 lightDir = normalize(LightDirection); // Normalize, for correct dot product results
+	vec3 lightDir = normalize(LightPosition - retFragPos); // Normalize, for correct dot product results
 	vec3 lambertian = dot(lightDir, retNormal) * LightColor; // Add lambertian lighting
 	vec3 outColor = clamp(lambertian + AmbientLight, 0.0f, 1.0f) * DiffuseColor;
 	FragColor = vec4(outColor, 1.0f) * texture(sampler1, retTexCoord); // Calculate final color
