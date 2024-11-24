@@ -18,6 +18,7 @@ public:
 	void SetScale(glm::vec3 _scale) { scale = _scale; }
 	void SetLightPosition(glm::vec3 _lightPosition) { lightPosition = _lightPosition; }
 	void SetLightColor(glm::vec3 _lightColor) { lightColor = _lightColor; }
+	void SetCameraPosition(glm::vec3 _cameraPosition) { cameraPosition = _cameraPosition; }
 
 	void Create(Shader* _shader);
 	void Cleanup();
@@ -44,6 +45,7 @@ private:
 
 	glm::vec3 lightPosition{ 0.0f, 0.0f, 0.0f };
 	glm::vec3 lightColor{ 1.0f, 1.0f, 1.0f };
+	glm::vec3 cameraPosition{ 0.0f, 0.0f, 0.0f };
 };
 
 #endif // MESH_H

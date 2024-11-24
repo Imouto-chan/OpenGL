@@ -12,17 +12,20 @@ public:
 
 	void LookAt(const glm::vec3& _position, const glm::vec3& _lookAt, const glm::vec3& _up)
 	{
+		position = _position;
 		view = glm::lookAt(_position, _lookAt, _up);
 	}
 
 	void SetResolution(const Resolution& _resolution, const float _near, const float _far);
 	glm::mat4 GetProjection() { return projection; }
 	glm::mat4 GetView() { return view; }
+	glm::vec3 GetPosition() { return position; }
 	//void SetWorldSpace(glm::vec3 _worldSpace);
 
 private:
 	glm::mat4 projection = {};
 	glm::mat4 view = {};
+	glm::vec3 position = {};
 	//glm::vec3 worldSpace = glm::vec3(4, 3, 3);
 };
 

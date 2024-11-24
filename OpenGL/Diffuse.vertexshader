@@ -4,12 +4,14 @@ in vec3 vertices; // Value sent from application to this attribute
 in vec3 normals;	// Normals for the vertices
 in vec2 texCoords; // Input texture coordinates
 
+uniform vec3 CameraPosition;
 uniform mat4 World;
 uniform mat4 WVP;
 
 out vec3 retFragPos; // Output the position
 out vec3 retNormal; // Output the normal
 out vec2 retTexCoord; // Output the texture coordinates
+out vec3 retViewDirection;
 
 void main()
 {
@@ -17,4 +19,5 @@ void main()
 	retNormal = normalize(mat3(transpose(inverse(World))) * normals);
 	retTexCoord = texCoords;
 	retFragPos = vec3(World * vec4(vertices, 1.0f));
+	retViewDirection = normalize(CameraPosition - retFragPos);
 }

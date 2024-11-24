@@ -22,6 +22,7 @@ public:
 	void Cleanup();
 	void SetVec3(const char* _name, glm::vec3 _value);
 	void SetMat4(const char* _name, glm::mat4 _value);
+	void SetFloat(const char* _name, float _value);
 
 private:
 	void CreateShaderProgram(const char* _vertexFilePath, const char* _fragmentFilePath);

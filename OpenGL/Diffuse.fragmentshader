@@ -3,9 +3,12 @@
 in vec3 retFragPos;
 in vec3 retNormal; // MUST use the same name as the out variable used by the vertex shader
 in vec2 retTexCoord; // out variable from the vertex shader
+in vec3 retViewDirection;
 
 out vec4 FragColor;
 
+uniform float SpecularStrength;
+uniform vec3 SpecularColor;
 uniform vec3 LightPosition;
 uniform vec3 LightDirection;
 uniform vec3 LightColor;
@@ -18,6 +21,8 @@ void main()
 {
 	vec3 lightDir = normalize(LightPosition - retFragPos); // Normalize, for correct dot product results
 	vec3 lambertian = dot(lightDir, retNormal) * LightColor; // Add lambertian lighting
-	vec3 outColor = clamp(lambertian + AmbientLight, 0.0f, 1.0f) * DiffuseColor;
+	vec3 refl = reflect(-lightDir, retNormal);
+	vec3 specular = pow(max(dot(refl, retViewDirection), 0.0f), SpecularStrength) * SpecularColor;
+	vec3 outColor = (lambertian + specular + AmbientLight) * DiffuseColor;
 	FragColor = vec4(outColor, 1.0f) * texture(sampler1, retTexCoord); // Calculate final color
 }
