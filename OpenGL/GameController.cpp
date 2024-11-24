@@ -35,7 +35,7 @@ void GameController::RunGame()
 
 	meshLight = Mesh();
 	meshLight.Create(&shaderColor);
-	meshLight.SetPosition({ 1.0f, 0.5f, 0.5f });
+	meshLight.SetPosition({ 1.0f, 0.5f, 0.0f });
 	meshLight.SetScale({ 0.1f, 0.1f, 0.1f });
 
 	meshBox = Mesh();

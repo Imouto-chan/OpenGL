@@ -20,10 +20,10 @@ void Mesh::Create(Shader* _shader)
 {
 	shader = _shader;
 	texture = Texture();
-	texture.LoadTexture("../Assets/Textures/Tacos.jpg");
+	texture.LoadTexture("../Assets/Textures/MetalFrameWood.jpg");
 
 	texture2 = Texture();
-	texture2.LoadTexture("../Assets/Textures/Pattern.png");
+	texture2.LoadTexture("../Assets/Textures/MetalFrame.jpg");
 
 	//m_vertexData = { -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
 	//m_vertexData = {
@@ -164,14 +164,20 @@ void Mesh::CalculateTransform()
 void Mesh::SetShaderVariables(glm::mat4 _pv)
 {
 	shader->SetMat4("World", world);
-	shader->SetVec3("AmbientLight", {0.1f, 0.1f, 0.1f});
-	shader->SetVec3("DiffuseColor", {1.0f, 1.0f, 1.0f});
-	shader->SetFloat("SpecularStrength", 10.0f);
-	shader->SetVec3("SpecularColor", { 3.0f, 0.0f, 0.0f });
-	shader->SetVec3("LightPosition", lightPosition);
-	shader->SetVec3("LightColor", lightColor);
 	shader->SetMat4("WVP", _pv * world);
 	shader->SetVec3("CameraPosition", cameraPosition);
+
+	// Configure Light
+	shader->SetVec3("light.position", lightPosition);
+	shader->SetVec3("light.color", lightColor);
+	shader->SetVec3("light.ambientColor", {0.1f, 0.1f, 0.1f});
+	shader->SetVec3("light.diffuseColor", {1.0f, 1.0f, 1.0f});
+	shader->SetVec3("light.specularColor", { 3.0f, 3.0f, 3.0f });
+	
+	// Configure Material
+	shader->SetFloat("material.specularStrength", 8.0f);
+	shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, texture.GetTexture());
+	shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, texture2.GetTexture());
 }
 
 void Mesh::Render(glm::mat4 _pv)
@@ -222,11 +228,11 @@ void Mesh::BindAttributes()
 
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture.GetTexture()); // Bind the texture
-	glUniform1i(shader->GetSampler1(), 0);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, texture.GetTexture()); // Bind the texture
+	//glUniform1i(shader->GetSampler1(), 0);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture2.GetTexture()); // Bind the texture
-	glUniform1i(shader->GetSampler2(), 1);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, texture2.GetTexture()); // Bind the texture
+	//glUniform1i(shader->GetSampler2(), 1);
 }
