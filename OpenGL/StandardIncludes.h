@@ -18,6 +18,7 @@
 #include <GLFW/glfw3.h>	// Include GLFW
 #include <glm/glm.hpp> // Include GLM
 #include <glm/gtc/matrix_transform.hpp> // View / Projection
+#include <glm/gtc/random.hpp>
 
 #include "Resolution.h"
 #include "Singleton.h"

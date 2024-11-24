@@ -21,8 +21,8 @@ private:
 	Shader shaderColor = {};
 	Shader shaderDiffuse = {};
 
-	Mesh meshBox = {};
-	Mesh meshLight = {};
+	std::vector<Mesh*> meshBoxes;
+	Mesh* meshLight = {};
 };
 
 #endif // GAME_CONTROLLER_H

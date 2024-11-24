@@ -12,6 +12,7 @@ void GameController::Initialize()
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black background
 	glEnable(GL_DEPTH_TEST);
+	srand(time(0));
 
 	camera = Camera(WindowController::GetInstance().GetResolution());
 	camera.LookAt({ 2, 2, 2 }, { 0,0,0 }, { 0,1,0 });
@@ -33,16 +34,22 @@ void GameController::RunGame()
 	shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
 	//shaderDiffuse.LoadShaders("Color.vertexshader", "Color.fragmentshader");
 
-	meshLight = Mesh();
-	meshLight.Create(&shaderColor);
-	meshLight.SetPosition({ 1.0f, 0.5f, 0.0f });
-	meshLight.SetScale({ 0.1f, 0.1f, 0.1f });
+	meshLight = new Mesh();
+	meshLight->Create(&shaderColor);
+	meshLight->SetPosition({ 1.0f, 0.5f, 0.0f });
+	meshLight->SetScale({ 0.1f, 0.1f, 0.1f });
 
-	meshBox = Mesh();
-	meshBox.Create(&shaderDiffuse);
-	meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
-	meshBox.SetLightPosition(meshLight.GetPosition());
-	meshBox.SetCameraPosition(camera.GetPosition());
+	for (int i = 0; i < 10; i++)
+	{
+		Mesh* box = new Mesh();
+		box->Create(&shaderDiffuse);
+		box->SetLightColor({ 0.5f, 0.9f, 0.5f });
+		box->SetLightPosition(meshLight->GetPosition());
+		box->SetCameraPosition(camera.GetPosition());
+		box->SetScale({ 0.3f, 0.3f, 0.3f });
+		box->SetPosition({ glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f) });
+		meshBoxes.push_back(box);
+	}
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
@@ -63,16 +70,26 @@ void GameController::RunGame()
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and dept buffer
-		meshLight.Render(camera.GetProjection() * camera.GetView());
-		meshBox.Render(camera.GetProjection() * camera.GetView());
+		meshLight->Render(camera.GetProjection() * camera.GetView());
+		
+		// Note we are now using a pointer so we are not doing a shallow copy, we could also
+		// use a reference if we were not on the Heap
+		for (auto box : meshBoxes)
+		{
+			box->Render(camera.GetProjection() * camera.GetView());
+		}
 		glfwSwapBuffers(win); // Swap the front and back buffers
 		glfwPollEvents();
 
 	} while (glfwGetKey(win, GLFW_KEY_ESCAPE) != GLFW_PRESS && // Check if the ESC Key was pressed
 		glfwWindowShouldClose(win) == 0); // Check if the window was closed
 
-	meshLight.Cleanup();
-	meshBox.Cleanup();
+	meshLight->Cleanup();
+	for (auto box : meshBoxes)
+	{
+		box->Cleanup();
+		delete box;
+	}
 	shaderDiffuse.Cleanup();
 	shaderColor.Cleanup();
 }
