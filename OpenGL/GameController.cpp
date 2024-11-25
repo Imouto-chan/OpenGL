@@ -15,7 +15,7 @@ void GameController::Initialize()
 	srand(time(0));
 
 	camera = Camera(WindowController::GetInstance().GetResolution());
-	camera.LookAt({ 1, 1, 1 }, { 0,0,0 }, { 0,1,0 });
+	camera.LookAt({ 5, 5, 5 }, { 0,0,0 }, { 0,1,0 });
 	//glfwSetWindowSize(WindowController::GetInstance().GetWindow(), resolutions[0].width, resolutions[0].height);
 }
 
@@ -34,32 +34,20 @@ void GameController::RunGame()
 	shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
 	//shaderDiffuse.LoadShaders("Color.vertexshader", "Color.fragmentshader");
 
-	// Create Lights
-	for (int i = 0; i < 4; i++)
-	{
-		Mesh* light = new Mesh();
-		light->Create(&shaderColor);
-		light->SetPosition({ 1.0f, 0.0f, -0.35f + (float)i * 0.2f});
-		light->SetLightDirection(glm::normalize(glm::vec3({ 0.0f, 0.0f, -0.35f + (float)i * 0.2f }) - light->GetPosition()));
-		light->SetColor({ glm::linearRand(0.0f, 1.0f), glm::linearRand(0.0f, 1.0f), glm::linearRand(0.0f, 1.0f) });
-		light->SetScale({ 0.1f, 0.1f, 0.1f });
-		lights.push_back(light);
-	}
+	
+	Mesh* light = new Mesh();
+	light->Create(&shaderColor, "../Assets/Models/Sphere.obj");
+	light->SetPosition({ 3.0f, 1.0f, 0.0f });
+	light->SetColor({ 1.0f, 1.0f, 1.0f });
+	light->SetScale({ 0.1f, 0.1f, 0.1f });
+	lights.push_back(light);
 
-	for (int row = 0; row < 10; row++)
-	{
-		for (int col = 0; col < 10; col++)
-		{
-			Mesh* box = new Mesh();
-			box->Create(&shaderDiffuse);
-			/*box->SetLightColor({ 1.0f, 1.0f, 1.0f });
-			box->SetLightPosition(meshLight->GetPosition());*/
-			box->SetCameraPosition(camera.GetPosition());
-			box->SetScale({ 0.1f, 0.1f, 0.1f });
-			box->SetPosition({0.0f, -0.5f + row * 0.1f, -0.5f + col * 0.1f});
-			meshBoxes.push_back(box);
-		}
-	}
+	Mesh* box = new Mesh();
+	box->Create(&shaderDiffuse, "../Assets/Models/Cube.obj");
+	box->SetCameraPosition(camera.GetPosition());
+	box->SetScale({ 1.0f, 1.0f, 1.0f });
+	box->SetPosition({0.0f, 0.0f, 0.0f});
+	meshBoxes.push_back(box);
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do

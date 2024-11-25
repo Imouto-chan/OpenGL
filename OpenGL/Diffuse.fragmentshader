@@ -17,22 +17,14 @@ struct Material
 struct Light
 {
 	vec3 position;
-	vec3 direction;
 	vec3 color;
 	vec3 ambientColor;
 	vec3 diffuseColor;
 	vec3 specularColor;
-
-	float constant;
-	float linear;
-	float quadratic;
-
-	float coneAngle;
-	float falloff;
 };
 
 uniform Material material;
-#define NUM_LIGHTS 4
+#define NUM_LIGHTS 1
 uniform Light light[NUM_LIGHTS];
 
 void main()
@@ -42,33 +34,18 @@ void main()
 	{
 		// Calculate lambertian strength
 		vec3 lightDir = normalize(light[i].position - retFragPos);
-		float a = cos(light[i].coneAngle);
-		float d = dot(normalize(light[i].direction), -lightDir);
+		float lambertianStrength = dot(lightDir, retNormal);
+		
+		// Calculate specular strength
+		vec3 refl = reflect(-lightDir, retNormal);
+		float specularStrength = pow(max(dot(retViewDirection, refl), 0.0f), material.specularStrength);
+		
+		vec3 ambient = texture(material.diffuseTexture, retTexCoord).rgb * light[i].ambientColor / NUM_LIGHTS;
+		vec3 lambertian = lambertianStrength * texture(material.diffuseTexture, retTexCoord).rgb * light[i].diffuseColor;
+		vec3 specular = specularStrength * texture(material.specularTexture, retTexCoord).rgb * light[i].specularColor;
 
-		if (a < d) // Visible in cone
-		{
-			float lambertianStrength = dot(lightDir, retNormal);
-
-			// Calculate specular strength
-			vec3 refl = reflect(-lightDir, retNormal);
-			float specularStrength = pow(max(dot(refl, retViewDirection), 0.0f), material.specularStrength);
-			float distance = length(light[i].position - retFragPos);
-			float att = 1.0f / (light[i].constant + light[i].linear * distance + light[i].quadratic * (distance * distance));
-			att *= 1 - pow(a / d, light[i].falloff); // Spotlight Falloff
-	
-			vec3 ambient = texture(material.diffuseTexture, retTexCoord).rgb * light[i].ambientColor * att;
-			vec3 lambertian = lambertianStrength * texture(material.diffuseTexture, retTexCoord).rgb * light[i].diffuseColor * att;
-			vec3 specular = specularStrength * texture(material.specularTexture, retTexCoord).rgb * light[i].specularColor * att;
-
-			// Calculate final color
-			finalColor += vec4(ambient + lambertian + specular, 1.0f);
-		}
-		else
-		{
-			// Calculate final color
-			vec3 ambient = texture(material.diffuseTexture, retTexCoord).rgb * light[i].ambientColor / NUM_LIGHTS;
-			finalColor += vec4(ambient, 1.0f);
-		}
+		// Calculate final color
+		finalColor += vec4(ambient + lambertian + specular, 1.0f);
 	}
 	FragColor = finalColor;
 }

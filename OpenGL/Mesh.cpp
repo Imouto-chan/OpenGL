@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "GameController.h"
+#include <OBJ_Loader.h>
 
 Mesh::~Mesh()
 {
@@ -17,127 +18,45 @@ Mesh::~Mesh()
 	texture2.Cleanup();
 }
 
-void Mesh::Create(Shader* _shader)
+void Mesh::Create(Shader* _shader, std::string _file)
 {
 	shader = _shader;
+
+	objl::Loader loader;
+	M_ASSERT(loader.LoadFile(_file) == true, "Failed to load mesh"); // Load .obj file
+
+	for (unsigned int i = 0; i < loader.LoadedMeshes.size(); i++)
+	{
+		objl::Mesh curMesh = loader.LoadedMeshes[i];
+		for (unsigned int j = 0; j < curMesh.Vertices.size(); j++)
+		{
+			m_vertexData.push_back(curMesh.Vertices[j].Position.X);
+			m_vertexData.push_back(curMesh.Vertices[j].Position.Y);
+			m_vertexData.push_back(curMesh.Vertices[j].Position.Z);
+			m_vertexData.push_back(curMesh.Vertices[j].Normal.X);
+			m_vertexData.push_back(curMesh.Vertices[j].Normal.Y);
+			m_vertexData.push_back(curMesh.Vertices[j].Normal.Z);
+			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.X);
+			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
+		}
+	}
+
+	std::string diffuseMap = loader.LoadedMaterials[0].map_Kd;
+	const size_t last_slash_idx = diffuseMap.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx)
+	{
+		diffuseMap.erase(0, last_slash_idx + 1);
+	}
+
 	texture = Texture();
-	texture.LoadTexture("../Assets/Textures/MetalFrameWood.jpg");
+	texture.LoadTexture("../Assets/Textures/" + diffuseMap);
 
 	texture2 = Texture();
-	texture2.LoadTexture("../Assets/Textures/MetalFrame.jpg");
-
-	//m_vertexData = { -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
-	//m_vertexData = {
-	//	/* Position */		 /* RGBA Color */
-	//	0.2f, 0.2f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
-	//	0.3f, 0.9f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f,
-	//	0.4f, 0.5f, 0.0f,	 0.0f, 0.0f, 1.0f, 1.0f,
-	//	0.7f, 0.8f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
-	//	0.8f, 0.0f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f,
-	//	1.0f, 0.6f, 0.0f,	 0.0f, 0.0f, 1.0f, 1.0f,
-	//	1.0f, 0.2f, 0.0f,	 1.0f, 0.0f, 0.0f, 1.0f,
-	//	1.5f, 0.6f, 0.0f,	 0.0f, 1.0f, 0.0f, 1.0f
-	//};
-
-	//m_vertexData = {
-	//	/* Position */		 /* RGBA Color */
-	//	20.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
-	//	30.0f, 90.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
-	//	40.0f, 50.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
-	//	70.0f, 80.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
-	//	80.0f, 40.0f, 0.0f, 	0.0f, 1.0f, 0.0f, 1.0f,
-	//	100.0f, 60.0f, 0.0f, 	0.0f, 0.0f, 1.0f, 1.0f,
-	//	100.0f, 20.0f, 0.0f, 	1.0f, 0.0f, 0.0f, 1.0f,
-	//	150.0f, 60.0f, 0.0f,	0.0f, 1.0f, 0.0f, 1.0f
-	//};
-
-	// Default values to reuse
-	//float a = 26.0f;
-	//float b = 42.0f;
-
-	//m_vertexData = {
-	//	/* Position */		 /* RGBA Color */
-	//	-a, 0.0f, b,	1.0f, 0.0f, 0.0f, 1.0f, // Red
-	//	a, 0.0f, b,		1.0f, 0.549f, 0.0f, 1.0f, // Orange
-	//	-a, 0.0f, -b, 	1.0f, 1.0f, 0.0f, 1.0f, // Yellow
-	//	a, 0.0f, -b, 	1.0f, 1.0f, 0.0f, 1.0f, // Green
-	//	0.0f, b, a, 	0.0f, 0.0f, 1.0f, 1.0f,// Blue
-	//	0.0f, b, -a, 	0.294f, 0.0f, 0.51f, 1.0f, // Indigo
-	//	0.0f, -b, a, 	0.502f, 0.0f, 0.502f, 1.0f, // Purple
-	//	0.0f, -b, -a, 	1.0f, 1.0f, 1.0f, 1.0f, //White
-	//	b, a, 0.0f, 	0.0f, 1.0f, 1.0f, 1.0f, // Cyan
-	//	-b, a, 0.0f, 	0.0f, 0.0f, 0.0f, 1.0f, // Black
-	//	b, -a, 0.0f, 	0.118f, 0.565f, 1.0f, 1.0f, // Dodger blue
-	//	-b, -a, 0.0f, 	0.863f, 0.078f, 0.235f, 1.0f // Crimson
-	//};
-
-	//m_vertexData = {
-	//	/*Position*/			/*RGB Color*/
-	//	50.0f, 50.0f, 0.0f,		1.0f, 0.0f, 0.0f,	1.0f, 1.0f, // Top=right
-	//	50.0f, -50.0f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f, // Bottom-right
-	//	-50.0f, -50.0f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 0.0f, // Bottom-left
-	//	-50.0f, 50.0f, 0.0f,	1.0f, 1.0f, 1.0f,	0.0f, 1.0f // Top-left
-	//};
-
-	m_vertexData = {
-		/* Position */ /* Normals */ /* Texture Coords */
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-		-0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-		0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
-	};
+	texture2.LoadTexture("../Assets/Textures/" + diffuseMap);
 
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(float), m_vertexData.data(), GL_STATIC_DRAW);
-
-	//m_indexData = {
-	//	0, 6, 1, 0, 11, 6, 1, 4, 0, 1, 8, 4,
-	//	1, 10, 8, 2, 5, 3, 2, 9, 5, 2, 11, 9,
-	//	3, 7, 2, 3, 10, 7, 4, 8, 5, 4, 9, 0,
-	//	5, 8, 3, 5, 9, 4, 6, 10, 1, 6, 11, 7,
-	//	7, 10, 6, 7, 11, 2, 8, 10, 3, 9, 11, 0
-	//};
-
-	/*m_indexData = {
-		2, 0, 3, 2, 1, 0
-	};
-
-	glGenBuffers(1, &indexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, indexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_indexData.size() * sizeof(float), m_indexData.data(), GL_STATIC_DRAW);*/
 }
 
 void Mesh::Cleanup()
@@ -211,6 +130,8 @@ void Mesh::Render(glm::mat4 _pv)
 
 void Mesh::BindAttributes()
 {
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
 	glEnableVertexAttribArray(shader->GetAttrVertices());
 	glVertexAttribPointer(
 		shader->GetAttrVertices(),			// Match the layout in the shader
@@ -219,7 +140,7 @@ void Mesh::BindAttributes()
 		GL_FALSE	/*normalized*/,
 		8 * sizeof(float)			/*stride (8 floats per vertex definition)*/,
 		(void*)0	/*offset*/);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
 	glEnableVertexAttribArray(shader->GetAttrNormals());
 	glVertexAttribPointer(shader->GetAttrNormals(),
