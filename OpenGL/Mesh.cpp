@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "Shader.h"
+#include "GameController.h"
 
 Mesh::~Mesh()
 {
@@ -167,18 +168,24 @@ void Mesh::SetShaderVariables(glm::mat4 _pv)
 	shader->SetMat4("WVP", _pv * world);
 	shader->SetVec3("CameraPosition", cameraPosition);
 
-	// Configure Light
-	shader->SetVec3("light.position", lightPosition);
-	shader->SetVec3("light.direction", glm::normalize(glm::vec3({0, 0, 0}) - lightPosition));
-	shader->SetVec3("light.color", lightColor);
-	shader->SetFloat("light.constant", 1.0f);
-	shader->SetFloat("light.linear", 0.09f);
-	shader->SetFloat("light.quadratic", 0.032f);
-	shader->SetVec3("light.ambientColor", {0.1f, 0.1f, 0.1f});
-	shader->SetVec3("light.diffuseColor", {1.0f, 1.0f, 1.0f});
-	shader->SetVec3("light.specularColor", { 3.0f, 3.0f, 3.0f });
-	shader->SetFloat("light.coneAngle", glm::radians(15.0f));
-	shader->SetFloat("light.falloff", 100);
+	std::vector<Mesh*>& lights = GameController::GetInstance().GetLights();
+	for (int i = 0; i < lights.size(); i++)
+	{
+		// Configure Light
+		shader->SetVec3(Concat("light[", i, "].position").c_str(), lights[i]->GetPosition());
+		shader->SetVec3(Concat("light[", i, "].direction").c_str(), lights[i]->GetLightDirection());
+
+		shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.1f, 0.1f, 0.1f });
+		shader->SetVec3(Concat("light[", i, "].diffuseColor").c_str(), lights[i]->GetColor());
+		shader->SetVec3(Concat("light[", i, "].specularColor").c_str(), { 3.0f, 3.0f, 3.0f });
+
+		shader->SetFloat(Concat("light[", i, "].constant").c_str(), 1.0f);
+		shader->SetFloat(Concat("light[", i, "].linear").c_str(), 0.09f);
+		shader->SetFloat(Concat("light[", i, "].quadratic").c_str(), 0.032f);
+
+		shader->SetFloat(Concat("light[", i, "].coneAngle").c_str(), glm::radians(5.0f));
+		shader->SetFloat(Concat("light[", i, "].falloff").c_str(), 200);
+	}
 	
 	// Configure Material
 	shader->SetFloat("material.specularStrength", 8.0f);
@@ -241,4 +248,10 @@ void Mesh::BindAttributes()
 	//glActiveTexture(GL_TEXTURE1);
 	//glBindTexture(GL_TEXTURE_2D, texture2.GetTexture()); // Bind the texture
 	//glUniform1i(shader->GetSampler2(), 1);
+}
+
+std::string Mesh::Concat(const std::string& _s1, int _index, const std::string& _s2)
+{
+	std::string index = std::to_string(_index);
+	return (_s1 + index + _s2);
 }
