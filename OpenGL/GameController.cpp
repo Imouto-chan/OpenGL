@@ -10,12 +10,12 @@ void GameController::Initialize()
 	M_ASSERT(glewInit() == GLEW_OK, "Failed to initialize GLEW."); // Initialize GLEW
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black background
+	glClearColor(0.1f, 0.1f, 0.1f, 0.0f); // Black background
 	glEnable(GL_DEPTH_TEST);
 	srand(time(0));
 
 	camera = Camera(WindowController::GetInstance().GetResolution());
-	camera.LookAt({ 2, 2, 2 }, { 0,0,0 }, { 0,1,0 });
+	camera.LookAt({ 1, 1, 1 }, { 0,0,0 }, { 0,1,0 });
 	//glfwSetWindowSize(WindowController::GetInstance().GetWindow(), resolutions[0].width, resolutions[0].height);
 }
 
@@ -36,19 +36,22 @@ void GameController::RunGame()
 
 	meshLight = new Mesh();
 	meshLight->Create(&shaderColor);
-	meshLight->SetPosition({ 1.0f, 0.5f, 0.0f });
+	meshLight->SetPosition({ 0.5f, 0.0f, -0.5f });
 	meshLight->SetScale({ 0.1f, 0.1f, 0.1f });
 
-	for (int i = 0; i < 10; i++)
+	for (int row = 0; row < 10; row++)
 	{
-		Mesh* box = new Mesh();
-		box->Create(&shaderDiffuse);
-		box->SetLightColor({ 0.5f, 0.9f, 0.5f });
-		box->SetLightPosition(meshLight->GetPosition());
-		box->SetCameraPosition(camera.GetPosition());
-		box->SetScale({ 0.3f, 0.3f, 0.3f });
-		box->SetPosition({ glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f) });
-		meshBoxes.push_back(box);
+		for (int col = 0; col < 10; col++)
+		{
+			Mesh* box = new Mesh();
+			box->Create(&shaderDiffuse);
+			box->SetLightColor({ 1.0f, 1.0f, 1.0f });
+			box->SetLightPosition(meshLight->GetPosition());
+			box->SetCameraPosition(camera.GetPosition());
+			box->SetScale({ 0.1f, 0.1f, 0.1f });
+			box->SetPosition({0.0f, -0.5f + (float)row / 10.0f, -0.2f + (float)col / 10.0f});
+			meshBoxes.push_back(box);
+		}
 	}
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
