@@ -1,0 +1,19 @@
+#version 330 // OpenGL version 3.3 (minimum requirement)
+
+in vec2 retTexCoord; // out variable from the vertex shader
+
+out vec4 FragColor;
+
+struct Material
+{
+	sampler2D diffuseTexture;
+};
+
+uniform Material material;
+uniform vec3 textColor;
+
+void main()
+{
+	vec4 sampled = vec4(1.0, 1.0, 1.0, texture(material.diffuseTexture, retTexCoord).r);
+	FragColor = vec4(textColor, 1.0) * sampled;
+}

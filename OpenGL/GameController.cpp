@@ -3,6 +3,7 @@
 #ifdef USE_TOOL_WINDOW
 	#include "ToolWindow.h"
 #endif
+#include "Font.h"
 
 void GameController::Initialize()
 {
@@ -12,6 +13,8 @@ void GameController::Initialize()
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
 	glClearColor(0.1f, 0.1f, 0.1f, 0.0f); // Black background
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	srand(time(0));
 
 	camera = Camera(WindowController::GetInstance().GetResolution());
@@ -32,7 +35,9 @@ void GameController::RunGame()
 
 	shaderDiffuse = Shader();
 	shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
-	//shaderDiffuse.LoadShaders("Color.vertexshader", "Color.fragmentshader");
+
+	shaderFont = Shader();
+	shaderFont.LoadShaders("Font.vertexshader", "Font.fragmentshader");
 
 	
 	Mesh* light = new Mesh();
@@ -48,6 +53,9 @@ void GameController::RunGame()
 	box->SetScale({ 1.0f, 1.0f, 1.0f });
 	box->SetPosition({0.0f, 0.0f, 0.0f});
 	meshBoxes.push_back(box);
+
+	Font* arialFont = new Font();
+	arialFont->Create(&shaderFont, "../Assets/Fonts/arial.ttf", 100);
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
@@ -81,6 +89,8 @@ void GameController::RunGame()
 			box->SetRotation(box->GetRotation() + rotationSpeed);
 			box->Render(camera.GetProjection() * camera.GetView());
 		}
+
+		arialFont->RenderText("Hello World", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
 		glfwSwapBuffers(win); // Swap the front and back buffers
 		glfwPollEvents();
 
@@ -98,6 +108,9 @@ void GameController::RunGame()
 		box->Cleanup();
 		delete box;
 	}
+	meshBoxes.clear();
+
+	shaderFont.Cleanup();
 	shaderDiffuse.Cleanup();
 	shaderColor.Cleanup();
 }
