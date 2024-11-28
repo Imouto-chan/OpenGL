@@ -1,24 +1,59 @@
 #version 330 // OpenGL version 3.3 (minimum requirement)
 
-in vec3 retColor; // MUST use the same name as the out variable used by the vertex shader
+in vec3 retFragPos;
+in vec3 retNormal; // MUST use the same name as the out variable used by the vertex shader
 in vec2 retTexCoord; // out variable from the vertex shader
+in vec3 retViewDirection;
 
 out vec4 FragColor;
 
-uniform sampler2D sampler1;
-uniform sampler2D sampler2;
+struct Material
+{
+	float specularStrength;
+	float specularRed;
+	float specularGreen;
+	float specularBlue;
+	sampler2D diffuseTexture;
+	sampler2D specularTexture;
+};
+
+struct Light
+{
+	vec3 position;
+	vec3 color;
+	vec3 ambientColor;
+	vec3 diffuseColor;
+	vec3 specularColor;
+};
+
+uniform Material material;
+#define NUM_LIGHTS 1
+uniform Light light[NUM_LIGHTS];
+
 
 void main()
 {
-	 // Example 1: Texture only
-	//FragColor = texture(sampler1, retTexCoord);
+	vec4 finalColor = vec4(0);
+	for(int i = 0; i < NUM_LIGHTS; i++)
+	{
+		// Calculate lambertian strength
+		vec3 lightDir = normalize(light[i].position - retFragPos);
+		float lambertianStrength = dot(lightDir, retNormal);
+		
+		// Calculate specular strength
+		vec3 refl = reflect(-lightDir, retNormal);
+		float specularStrength = pow(max(dot(retViewDirection, refl), 0.0f), material.specularStrength);
+		
+		vec3 ambient = texture(material.diffuseTexture, retTexCoord).rgb * light[i].ambientColor / NUM_LIGHTS;
+		vec3 lambertian = lambertianStrength * texture(material.diffuseTexture, retTexCoord).rgb * light[i].diffuseColor;
+		vec3 specular = specularStrength * texture(material.specularTexture, retTexCoord).rgb * light[i].specularColor;
 
-	// Example 2: Texture and Color
-	//FragColor = texture(sampler1, retTexCoord) * vec4(retColor, 1.0f);
+		// Calculate final color
+		finalColor += vec4(ambient, 1.0f);
 
-	// Example 3: 2 Textures
-	//FragColor = mix(texture(sampler1, retTexCoord), texture(sampler2, retTexCoord), 0.3);
-
-	// Example 4: 2 Textures and Color
-	FragColor = mix(texture(sampler1, retTexCoord), texture(sampler2, retTexCoord), 0.3) * vec4(retColor, 1.0f);
+		finalColor.x *= material.specularRed;
+		finalColor.y *= material.specularGreen;
+		finalColor.z *= material.specularBlue;
+	}
+	FragColor = finalColor;
 }

@@ -23,6 +23,7 @@ private:
 	Shader shaderColor = {};
 	Shader shaderDiffuse = {};
 	Shader shaderFont = {};
+	Shader shader = {};
 
 	std::vector<Mesh*> meshBoxes;
 	std::vector<Mesh*> lights;

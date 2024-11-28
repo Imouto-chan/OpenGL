@@ -3,6 +3,8 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 
+#define USE_TOOL_WINDOW
+
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>

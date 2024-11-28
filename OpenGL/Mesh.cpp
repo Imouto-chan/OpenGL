@@ -107,7 +107,10 @@ void Mesh::SetShaderVariables(glm::mat4 _pv)
 	}
 	
 	// Configure Material
-	shader->SetFloat("material.specularStrength", 8.0f);
+	shader->SetFloat("material.specularStrength", specularStrength);
+	shader->SetFloat("material.specularRed", specularRed);
+	shader->SetFloat("material.specularGreen", specularGreen);
+	shader->SetFloat("material.specularBlue", specularBlue);
 	shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, texture.GetTexture());
 	shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, texture2.GetTexture());
 }
@@ -116,7 +119,7 @@ void Mesh::Render(glm::mat4 _pv)
 {
 	glUseProgram(shader->GetProgramID()); // Use our shader
 
-	rotation.y += 0.005f;
+	//rotation.y += 0.005f;
 
 	CalculateTransform();
 	SetShaderVariables(_pv);

@@ -23,6 +23,11 @@ public:
 	void SetLightDirection(glm::vec3 _lightDirection) { lightDirection = _lightDirection; }
 	glm::vec3 GetLightDirection() { return lightDirection; }
 	void SetCameraPosition(glm::vec3 _cameraPosition) { cameraPosition = _cameraPosition; }
+	float GetSpecularStrength() { return specularStrength; }
+	void SetSpecularStrength(float _specularStrength) { specularStrength = _specularStrength; }
+	void SetSpecularRed(float _specularRed) { specularRed = _specularRed; }
+	void SetSpecularGreen(float _specularGreen) { specularGreen = _specularGreen; }
+	void SetSpecularBlue(float _specularBlue) { specularBlue = _specularBlue; }
 
 	void Create(Shader* _shader, std::string _file);
 	void Cleanup();
@@ -51,6 +56,11 @@ private:
 
 	glm::vec3 lightDirection{ 0.0f, 0.0f, 0.0f };
 	glm::vec3 cameraPosition{ 0.0f, 0.0f, 0.0f };
+
+	float specularStrength = 8.0f;
+	float specularRed = 1.0f;
+	float specularGreen = 1.0f;
+	float specularBlue = 1.0f;
 };
 
 #endif // MESH_H

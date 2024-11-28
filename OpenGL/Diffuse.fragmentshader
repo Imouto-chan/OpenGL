@@ -10,6 +10,9 @@ out vec4 FragColor;
 struct Material
 {
 	float specularStrength;
+	float specularRed;
+	float specularGreen;
+	float specularBlue;
 	sampler2D diffuseTexture;
 	sampler2D specularTexture;
 };
@@ -27,6 +30,7 @@ uniform Material material;
 #define NUM_LIGHTS 1
 uniform Light light[NUM_LIGHTS];
 
+
 void main()
 {
 	vec4 finalColor = vec4(0);
@@ -43,6 +47,10 @@ void main()
 		vec3 ambient = texture(material.diffuseTexture, retTexCoord).rgb * light[i].ambientColor / NUM_LIGHTS;
 		vec3 lambertian = lambertianStrength * texture(material.diffuseTexture, retTexCoord).rgb * light[i].diffuseColor;
 		vec3 specular = specularStrength * texture(material.specularTexture, retTexCoord).rgb * light[i].specularColor;
+
+		specular.x *= material.specularRed;
+		specular.y *= material.specularGreen;
+		specular.z *= material.specularBlue;
 
 		// Calculate final color
 		finalColor += vec4(ambient + lambertian + specular, 1.0f);

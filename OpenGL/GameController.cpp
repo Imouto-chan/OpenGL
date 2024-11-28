@@ -4,6 +4,7 @@
 	#include "ToolWindow.h"
 #endif
 #include "Font.h"
+#include <WinUser.h>
 
 void GameController::Initialize()
 {
@@ -18,7 +19,7 @@ void GameController::Initialize()
 	srand(time(0));
 
 	camera = Camera(WindowController::GetInstance().GetResolution());
-	camera.LookAt({ 5, 5, 5 }, { 0,0,0 }, { 0,1,0 });
+	camera.LookAt({ 5, 0, 10 }, { 0,0,0 }, { 0,1,0 });
 	//glfwSetWindowSize(WindowController::GetInstance().GetWindow(), resolutions[0].width, resolutions[0].height);
 }
 
@@ -39,23 +40,33 @@ void GameController::RunGame()
 	shaderFont = Shader();
 	shaderFont.LoadShaders("Font.vertexshader", "Font.fragmentshader");
 
+
+	shader = Shader();
+	shader.LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+
 	
 	Mesh* light = new Mesh();
 	light->Create(&shaderColor, "../Assets/Models/Sphere.obj");
-	light->SetPosition({ 3.0f, 1.0f, 0.0f });
+	light->SetPosition({ 0.0f, 0.0f, 4.0f });
 	light->SetColor({ 1.0f, 1.0f, 1.0f });
 	light->SetScale({ 0.1f, 0.1f, 0.1f });
 	lights.push_back(light);
 
 	Mesh* box = new Mesh();
-	box->Create(&shaderDiffuse, "../Assets/Models/Cube.obj");
+	box->Create(&shaderDiffuse, "../Assets/Models/monkey.obj");
 	box->SetCameraPosition(camera.GetPosition());
 	box->SetScale({ 1.0f, 1.0f, 1.0f });
-	box->SetPosition({0.0f, 0.0f, 0.0f});
+	box->SetPosition({ 0.0f, 0.0f, 0.0f });
 	meshBoxes.push_back(box);
 
 	Font* arialFont = new Font();
 	arialFont->Create(&shaderFont, "../Assets/Fonts/arial.ttf", 100);
+
+	POINT p;
+	p.x = 0;
+	p.y = 0;
+	bool allowBoxes = false, boxAdded = false, colorPosition = false;
+	int boxCount = 0;
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
@@ -64,13 +75,10 @@ void GameController::RunGame()
 		// Winform stuff
 		System::Windows::Forms::Application::DoEvents(); // Handle C++/CLI form events
 
-		GLint loc = 0;
-		loc = glGetUniformLocation(shader.GetProgramID(), "RenderRedChannel");
-		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderRedChannel);
-		loc = glGetUniformLocation(shader.GetProgramID(), "RenderGreenChannel");
-		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderGreenChannel);
-		loc = glGetUniformLocation(shader.GetProgramID(), "RenderBlueChannel");
-		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderBlueChannel);
+		meshBoxes.at(0)->SetSpecularStrength(OpenGL::ToolWindow::specularStrength);
+		meshBoxes.at(0)->SetSpecularRed((float)OpenGL::ToolWindow::specularRedChannel / 100);
+		meshBoxes.at(0)->SetSpecularGreen((float)OpenGL::ToolWindow::specularGreenChannel / 100);
+		meshBoxes.at(0)->SetSpecularBlue((float)OpenGL::ToolWindow::specularBlueChannel / 100);
 #endif
 
 
@@ -81,16 +89,179 @@ void GameController::RunGame()
 			light->Render(camera.GetProjection() * camera.GetView());
 		}
 		
-		// Note we are now using a pointer so we are not doing a shallow copy, we could also
-		// use a reference if we were not on the Heap
-		glm::vec3 rotationSpeed = { 0.0f, 0.005f, 0.0f };
+		if (OpenGL::ToolWindow::radioMoveLightValue)
+		{
+			colorPosition = false;
+			allowBoxes = false;
+			for (auto box : meshBoxes)
+			{
+				box->Cleanup();
+				delete box;
+			}
+			
+			meshBoxes.clear();
+
+			box = new Mesh();
+			box->Create(&shaderDiffuse, "../Assets/Models/monkey.obj");
+			box->SetCameraPosition(camera.GetPosition());
+			box->SetScale({ 1.0f, 1.0f, 1.0f });
+			box->SetPosition({ 0.0f, 0.0f, 0.0f });
+			meshBoxes.push_back(box);
+
+			OpenGL::ToolWindow::radioMoveLightValue = false;
+		}
+		else if (OpenGL::ToolWindow::radioCubesToSphereValue)
+		{
+			colorPosition = false;
+			boxCount = 0;
+			allowBoxes = true;
+			for (auto box : meshBoxes)
+			{
+				box->Cleanup();
+				delete box;
+			}
+			meshBoxes.clear();
+
+			box = new Mesh();
+			box->Create(&shaderDiffuse, "../Assets/Models/monkeyBall.obj");
+			box->SetCameraPosition(camera.GetPosition());
+			box->SetScale({ 1.0f, 1.0f, 1.0f });
+			box->SetPosition({ 0.0f, 0.0f, 0.0f });
+			meshBoxes.push_back(box);
+
+			OpenGL::ToolWindow::radioCubesToSphereValue = false;
+		}
+		else if (OpenGL::ToolWindow::radioColorPositionValue)
+		{
+			colorPosition = true;
+			allowBoxes = false;
+			for (auto box : meshBoxes)
+			{
+				box->Cleanup();
+				delete box;
+			}
+
+			meshBoxes.clear();
+
+			box = new Mesh();
+			box->Create(&shader, "../Assets/Models/monkey.obj");
+			box->SetCameraPosition(camera.GetPosition());
+			box->SetScale({ 1.0f, 1.0f, 1.0f });
+			box->SetPosition({ 0.0f, 0.0f, 0.0f });
+			meshBoxes.push_back(box);
+
+			OpenGL::ToolWindow::radioColorPositionValue = false;
+		}
+
+		if (OpenGL::ToolWindow::resetLightPos)
+		{
+			light->SetPosition({ 0.0f, 0.0f, 4.0f });
+			OpenGL::ToolWindow::resetLightPos = false;
+		}
+		else if (OpenGL::ToolWindow::resetMonkeyPos && !allowBoxes)
+		{
+			meshBoxes.at(0)->SetPosition({0.0f, 0.0f, 0.0f});
+			OpenGL::ToolWindow::resetMonkeyPos = false;
+		}
+
+		GetCursorPos(&p);
+
+		if (allowBoxes)
+		{
+			if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !boxAdded) // left mouse button was pressed
+			{
+				boxAdded = true;
+				boxCount++;
+				box = new Mesh();
+				box->Create(&shaderDiffuse, "../Assets/Models/CubeBox.obj");
+				box->SetCameraPosition(camera.GetPosition());
+				box->SetScale({ 0.5f, 0.5f, 0.5f });
+				box->SetPosition({ glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f) });
+				meshBoxes.push_back(box);
+			}
+			else if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS && boxAdded)
+			{
+				boxAdded = false;
+			}
+		}
+		else if (!colorPosition)
+		{
+			if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) // left mouse button was pressed
+			{
+				if (p.x < (1024 / 2))
+				{
+					glm::vec3 pos = light->GetPosition();
+					pos.x -= 0.01;
+					light->SetPosition(pos);
+				}
+				else
+				{
+					glm::vec3 pos = light->GetPosition();
+					pos.x += 0.01;
+					light->SetPosition(pos);
+				}
+
+				if (p.y < (768 / 2))
+				{
+					glm::vec3 pos = light->GetPosition();
+					pos.y += 0.01;
+					light->SetPosition(pos);
+				}
+				else
+				{
+					glm::vec3 pos = light->GetPosition();
+					pos.y -= 0.01;
+					light->SetPosition(pos);
+				}
+			}
+		}
+		else if (colorPosition)
+		{
+			if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) // left mouse button was pressed
+			{
+				if (p.x < (1024 / 2))
+				{
+					glm::vec3 pos = meshBoxes.at(0)->GetPosition();
+					pos.x -= 0.01;
+					meshBoxes.at(0)->SetPosition(pos);
+				}
+				else
+				{
+					glm::vec3 pos = meshBoxes.at(0)->GetPosition();
+					pos.x += 0.01;
+					meshBoxes.at(0)->SetPosition(pos);
+				}
+
+				if (p.y < (768 / 2))
+				{
+					glm::vec3 pos = meshBoxes.at(0)->GetPosition();
+					pos.y += 0.01;
+					meshBoxes.at(0)->SetPosition(pos);
+				}
+				else
+				{
+					glm::vec3 pos = meshBoxes.at(0)->GetPosition();
+					pos.y -= 0.01;
+					meshBoxes.at(0)->SetPosition(pos);
+				}
+			}
+		}
+
+
+		glm::vec3 rotation = { 0.005f, 0.0f, 0.0f };
 		for (auto box : meshBoxes)
 		{
-			box->SetRotation(box->GetRotation() + rotationSpeed);
+			box->SetRotation(box->GetRotation() + rotation);
 			box->Render(camera.GetProjection() * camera.GetView());
 		}
 
-		arialFont->RenderText("Hello World", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
+		std::string output = "Mouse Pos ";
+		std::string position = std::to_string(p.x) + " " + std::to_string(p.y);
+		output += position;
+		arialFont->RenderText(output, 10, 50, 0.5f, {1.0f, 1.0f, 0.0f});
+		arialFont->RenderText("Cubes: " + std::to_string(boxCount), 10, 150, 0.5f, { 1.0f, 1.0f, 0.0f });
+
+
 		glfwSwapBuffers(win); // Swap the front and back buffers
 		glfwPollEvents();
 
@@ -113,4 +284,5 @@ void GameController::RunGame()
 	shaderFont.Cleanup();
 	shaderDiffuse.Cleanup();
 	shaderColor.Cleanup();
+	shader.Cleanup();
 }
