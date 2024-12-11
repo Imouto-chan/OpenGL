@@ -4,6 +4,7 @@
 	#include "ToolWindow.h"
 #endif
 #include "Font.h"
+#include "Mesh.h"
 
 void GameController::Initialize()
 {
@@ -48,11 +49,25 @@ void GameController::RunGame()
 	lights.push_back(light);
 
 	Mesh* box = new Mesh();
-	box->Create(&shaderDiffuse, "../Assets/Models/Cube.obj");
+	box->Create(&shaderDiffuse, "../Assets/Models/monkey.obj");
 	box->SetCameraPosition(camera.GetPosition());
 	box->SetScale({ 1.0f, 1.0f, 1.0f });
 	box->SetPosition({0.0f, 0.0f, 0.0f});
-	meshBoxes.push_back(box);
+	meshBoxes.push_back(box);box = new Mesh();
+
+	Mesh* plane = new Mesh();
+	plane->Create(&shaderDiffuse, "../Assets/Models/Plane.obj");
+	plane->SetCameraPosition(camera.GetPosition());
+	plane->SetScale({ 1.0f, 1.0f, 1.0f });
+	plane->SetPosition({-1.0f, -1.0f, -1.0f});
+	meshBoxes.push_back(plane);
+
+	Mesh* windowMesh = new Mesh();
+	windowMesh->Create(&shaderDiffuse, "../Assets/Models/Window.obj");
+	windowMesh->SetCameraPosition(camera.GetPosition());
+	windowMesh->SetScale({ 1.0f, 1.0f, 1.0f });
+	windowMesh->SetPosition({0.0f, 0.0f, 0.0f});
+	meshBoxes.push_back(windowMesh);
 
 	Font* arialFont = new Font();
 	arialFont->Create(&shaderFont, "../Assets/Fonts/arial.ttf", 100);
