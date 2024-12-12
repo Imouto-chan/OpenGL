@@ -13,6 +13,12 @@ struct Resolution
 		height = _height;
 	}
 
+	Resolution(int _width, int _height)
+	{
+		width = _width;
+		height = _height;
+	}
+
 	Resolution()
 	{
 	}

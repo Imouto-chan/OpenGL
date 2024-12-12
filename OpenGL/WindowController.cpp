@@ -14,6 +14,19 @@ WindowController::~WindowController()
 	}
 }
 
+void WindowController::Create(int _width, int _height)
+{
+	if (_width == -1 || _height == -1)
+	{
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		resolution = Resolution(mode->width, mode->height);
+	}
+	else
+	{
+		resolution = Resolution(_width, _height);
+	}
+}
+
 void WindowController::NewWindow()
 {
 	M_ASSERT(glfwInit(), "Failed to initialize GLFW;"); // Initialize GLFW
@@ -22,13 +35,14 @@ void WindowController::NewWindow()
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	window = glfwCreateWindow(1024, 768, "PROG31068", NULL, NULL);
+	Resolution r = WindowController::GetResolution();
+	window = glfwCreateWindow(r.width, r.height, "PROG31068", NULL, NULL);
 	if (window != nullptr)
 		glfwMakeContextCurrent(window);
 }
-
-Resolution WindowController::GetResolution()
-{
-	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	return Resolution(mode->width, mode->height, 45);
-}
+//
+//Resolution WindowController::GetResolution()
+//{
+//	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//	return Resolution(mode->width, mode->height, 45);
+//}

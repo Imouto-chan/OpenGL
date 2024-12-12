@@ -1,0 +1,14 @@
+#version 330 // OpenGL version 3.3 (minimum requirement)
+
+in vec2 retTexCoords;
+
+out vec4 FragColor;
+
+uniform sampler2D screenTexture;
+
+void main()
+{
+	vec3 col = texture(screenTexture, retTexCoords).rgb;
+	// invert color : FragColor = vec4(1.0 - col, 1.0);
+	FragColor = vec4(col, 1.0);
+}
