@@ -5,6 +5,7 @@
 #endif
 #include "Font.h"
 #include "Mesh.h"
+#include "GameTime.h"
 
 void GameController::Initialize()
 {
@@ -19,8 +20,11 @@ void GameController::Initialize()
 	glEnable(GL_CULL_FACE);
 	srand(time(0));
 
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	camera = Camera(WindowController::GetInstance().GetResolution());
-	camera.LookAt({ 2, 2, 2 }, { 0,0,0 }, { 0,1,0 });
+	camera.LookAt({ 5, 5, 5 }, { 0,0,0 }, { 0,1,0 });
 	//glfwSetWindowSize(WindowController::GetInstance().GetWindow(), resolutions[0].width, resolutions[0].height);
 }
 
@@ -47,16 +51,27 @@ void GameController::RunGame()
 	
 	Mesh* light = new Mesh();
 	light->Create(&shaderColor, "../Assets/Models/Sphere.obj");
-	light->SetPosition({ 0.0f, 0.8f, 1.0f });
+	light->SetPosition({ 3.0f, 0.0f, 0.0f });
 	light->SetColor({ 1.0f, 1.0f, 1.0f });
 	light->SetScale({ 0.1f, 0.1f, 0.1f });
 	lights.push_back(light);
 
-	Mesh* mesh = new Mesh();
-	mesh->Create(&shaderDiffuse, "../Assets/Models/Fighter.obj");
+	Mesh* mesh = nullptr;
+
+	// Fighter
+	//mesh = new Mesh();
+	//mesh->Create(&shaderDiffuse, "../Assets/Models/Fighter.obj");
+	//mesh->SetCameraPosition(camera.GetPosition());
+	//mesh->SetPosition({0.0f, 0.0f, 0.0f});
+	//mesh->SetScale({ 0.002f, 0.002f, 0.002f });
+	//meshes.push_back(mesh);
+
+	// Cube
+	mesh = new Mesh();
+	mesh->Create(&shaderDiffuse, "../Assets/Models/Cube.obj", 1000);
 	mesh->SetCameraPosition(camera.GetPosition());
+	mesh->SetScale({ 0.1f, 0.1f, 0.1f });
 	mesh->SetPosition({0.0f, 0.0f, 0.0f});
-	mesh->SetScale({ 0.002f, 0.002f, 0.002f });
 	meshes.push_back(mesh);
 
 	/*box = new Mesh();
@@ -78,6 +93,7 @@ void GameController::RunGame()
 	Font* arialFont = new Font();
 	arialFont->Create(&shaderFont, "../Assets/Fonts/arial.ttf", 100);
 
+	GameTime::GetInstance().Initialize();
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
 	{
@@ -94,7 +110,7 @@ void GameController::RunGame()
 		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderBlueChannel);
 #endif
 
-
+		GameTime::GetInstance().Update();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and dept buffer
 
@@ -109,14 +125,14 @@ void GameController::RunGame()
 		
 		// Note we are now using a pointer so we are not doing a shallow copy, we could also
 		// use a reference if we were not on the Heap
-		glm::vec3 rotationSpeed = { 0.0f, 0.05f, 0.0f };
+		glm::vec3 rotationSpeed = { 0.0f, 0.005f, 0.0f };
 		for (auto mesh : meshes)
 		{
-			//box->SetRotation(box->GetRotation() + rotationSpeed);
+			mesh->SetRotation(mesh->GetRotation() + rotationSpeed);
 			mesh->Render(camera.GetProjection() * camera.GetView());
 		}
 
-		arialFont->RenderText("Hello World", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
+		arialFont->RenderText(std::to_string(GameTime::GetInstance().Fps()), 100, 100, 0.5f, {1.0f, 1.0f, 0.0f});
 		glfwSwapBuffers(win); // Swap the front and back buffers
 		glfwPollEvents();
 

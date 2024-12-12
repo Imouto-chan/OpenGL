@@ -18,9 +18,12 @@ Mesh::~Mesh()
 	textureSpecular.Cleanup();
 }
 
-void Mesh::Create(Shader* _shader, std::string _file)
+void Mesh::Create(Shader* _shader, std::string _file, int _instanceCount)
 {
 	shader = _shader;
+
+	instanceCount = _instanceCount;
+	enableInstancing = instanceCount > 1 ? true : false;
 
 	objl::Loader loader;
 	M_ASSERT(loader.LoadFile(_file) == true, "Failed to load mesh"); // Load .obj file
@@ -68,18 +71,11 @@ void Mesh::Create(Shader* _shader, std::string _file)
 		}
 	}
 
-	//std::string diffuseMap = loader.LoadedMaterials[0].map_Kd;
-	//const size_t last_slash_idx = diffuseMap.find_last_of("\\/");
-	//if (std::string::npos != last_slash_idx)
-	//{
-	//	diffuseMap.erase(0, last_slash_idx + 1);
-	//}
 
-	//textureDiffuse = Texture();
-	//textureDiffuse.LoadTexture("../Assets/Textures/" + diffuseMap);
-
-	//textureSpecular = Texture();
-	//textureSpecular.LoadTexture("../Assets/Textures/" + diffuseMap);
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(float), m_vertexData.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	textureDiffuse = Texture();
 	if (loader.LoadedMaterials[0].map_Kd != "")
@@ -110,9 +106,28 @@ void Mesh::Create(Shader* _shader, std::string _file)
 		vertexStride += 6;
 	}
 
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(float), m_vertexData.data(), GL_STATIC_DRAW);
+	if (enableInstancing)
+	{
+		glGenBuffers(1, &instanceBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
+
+		srand(glfwGetTime()); // initialize random seed
+		for (unsigned int i = 0; i < instanceCount; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-20 + rand() % 40, -10 + rand() % 20, -10 + rand() % 20));
+			for (int x = 0; x < 4; x++)
+			{
+				for (int y = 0; y < 4; y++)
+				{
+					instanceData.push_back(model[x][y]);
+				}
+			}
+		}
+
+		glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(glm::mat4), instanceData.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 }
 
 void Mesh::Cleanup()
@@ -143,6 +158,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv)
 	shader->SetMat4("WVP", _pv * world);
 	shader->SetVec3("CameraPosition", cameraPosition);
 	shader->SetInt("EnableNormalMaps", enableNormalMaps);
+	shader->SetInt("EnableInstancing", enableInstancing);
 
 	std::vector<Mesh*>& lights = GameController::GetInstance().GetLights();
 	for (int i = 0; i < lights.size(); i++)
@@ -180,10 +196,31 @@ void Mesh::Render(glm::mat4 _pv)
 	SetShaderVariables(_pv);
 	BindAttributes();
 
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / vertexStride);
+	if (enableInstancing)
+	{
+		glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertexData.size() / vertexStride, instanceCount);
+	}
+	else
+	{
+		glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / vertexStride);
+	}
+
 	glDisableVertexAttribArray(shader->GetAttrVertices());
 	glDisableVertexAttribArray(shader->GetAttrNormals());
 	glDisableVertexAttribArray(shader->GetAttrTexCoords());
+
+	if (enableNormalMaps)
+	{
+		glDisableVertexAttribArray(shader->GetAttrTangents());
+		glDisableVertexAttribArray(shader->GetAttrBitangents());
+	}
+	if (enableInstancing)
+	{
+		glDisableVertexAttribArray(shader->GetAttrInstanceMatrix());
+		glDisableVertexAttribArray(shader->GetAttrInstanceMatrix() + 1);
+		glDisableVertexAttribArray(shader->GetAttrInstanceMatrix() + 2);
+		glDisableVertexAttribArray(shader->GetAttrInstanceMatrix() + 3);
+	}
 }
 
 void Mesh::BindAttributes()
@@ -241,6 +278,45 @@ void Mesh::BindAttributes()
 			vertexStride * sizeof(float),			// stride (8 floats per vertex definition)
 			(void*)(11 * sizeof(float))	// array buffer offset
 		);
+	}
+
+	if (enableInstancing)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer); // Bind the vertex buffer
+
+		// Set attribute pointers for instance matrix (4 times vec4)
+		glEnableVertexAttribArray(shader->GetAttrInstanceMatrix());
+		glVertexAttribPointer(shader->GetAttrInstanceMatrix(),
+			4, GL_FLOAT, GL_FALSE,	// size, type, normalized?
+			sizeof(glm::mat4),		// stride
+			(void*)(0) // array buffer offset
+		);
+
+		glEnableVertexAttribArray(shader->GetAttrInstanceMatrix() + 1);
+		glVertexAttribPointer(shader->GetAttrInstanceMatrix() + 1,
+			4, GL_FLOAT, GL_FALSE,	// size, type, normalized?
+			sizeof(glm::mat4),		// stride
+			(void*)(sizeof(glm::vec4)) // array buffer offset
+		);
+
+		glEnableVertexAttribArray(shader->GetAttrInstanceMatrix() + 2);
+		glVertexAttribPointer(shader->GetAttrInstanceMatrix() + 2,
+			4, GL_FLOAT, GL_FALSE,	// size, type, normalized?
+			sizeof(glm::mat4),		// stride
+			(void*)(2 * sizeof(glm::vec4)) // array buffer offset
+		);
+
+		glEnableVertexAttribArray(shader->GetAttrInstanceMatrix() + 3);
+		glVertexAttribPointer(shader->GetAttrInstanceMatrix() + 3,
+			4, GL_FLOAT, GL_FALSE,	// size, type, normalized?
+			sizeof(glm::mat4),		// stride
+			(void*)(3 * sizeof(glm::vec4)) // array buffer offset
+		);
+
+		glVertexAttribDivisor(shader->GetAttrInstanceMatrix(), 1);
+		glVertexAttribDivisor(shader->GetAttrInstanceMatrix() + 1, 1);
+		glVertexAttribDivisor(shader->GetAttrInstanceMatrix() + 2, 1);
+		glVertexAttribDivisor(shader->GetAttrInstanceMatrix() + 3, 1);
 	}
 
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
