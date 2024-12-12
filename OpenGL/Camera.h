@@ -20,13 +20,16 @@ public:
 	glm::mat4 GetProjection() { return projection; }
 	glm::mat4 GetView() { return view; }
 	glm::vec3 GetPosition() { return position; }
-	//void SetWorldSpace(glm::vec3 _worldSpace);
+
+	void Rotate();
 
 private:
 	glm::mat4 projection = {};
 	glm::mat4 view = {};
 	glm::vec3 position = {};
-	//glm::vec3 worldSpace = glm::vec3(4, 3, 3);
+	glm::vec3 lookAt = {};
+	glm::vec3 rotation = {};
+	float angle = 0.0f;
 };
 
 #endif // CAMERA_H

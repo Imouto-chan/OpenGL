@@ -27,8 +27,13 @@ void Camera::SetResolution(const Resolution& _resolution, const float _near, con
 		glm::vec3(0, 1, 0) // Head is up (set to 0, -1, 0 to look upside-down
 	);
 }
-//
-//void Camera::SetWorldSpace(glm::vec3 _worldSpace)
-//{
-//	worldSpace = _worldSpace;
-//}
+
+void Camera::Rotate()
+{
+	angle += 0.1f;
+	lookAt.x = cos(glm::radians(angle)) * 100;
+	lookAt.z = sin(glm::radians(angle)) * 100;
+
+	// Camerea matrix
+	view = glm::lookAt(position, lookAt, glm::vec3(0, 1, 0));
+}
