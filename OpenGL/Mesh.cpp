@@ -14,8 +14,8 @@ Mesh::~Mesh()
 		glDeleteBuffers(1, &indexBuffer);
 	}
 
-	texture.Cleanup();
-	texture2.Cleanup();
+	textureDiffuse.Cleanup();
+	textureSpecular.Cleanup();
 }
 
 void Mesh::Create(Shader* _shader, std::string _file)
@@ -28,6 +28,22 @@ void Mesh::Create(Shader* _shader, std::string _file)
 	for (unsigned int i = 0; i < loader.LoadedMeshes.size(); i++)
 	{
 		objl::Mesh curMesh = loader.LoadedMeshes[i];
+		std::vector<objl::Vector3> tangents;
+		std::vector<objl::Vector3> bitangents;
+		std::vector<objl::Vertex> triangle;
+		objl::Vector3 tangent;
+		objl::Vector3 bitangent;
+		for (unsigned int j = 0; j < curMesh.Vertices.size(); j += 3)
+		{
+			triangle.clear();
+			triangle.push_back(curMesh.Vertices[j]);
+			triangle.push_back(curMesh.Vertices[j + 1]);
+			triangle.push_back(curMesh.Vertices[j + 2]);
+			CalculateTangents(triangle, tangent, bitangent);
+			tangents.push_back(tangent);
+			bitangents.push_back(bitangent);
+		}
+
 		for (unsigned int j = 0; j < curMesh.Vertices.size(); j++)
 		{
 			m_vertexData.push_back(curMesh.Vertices[j].Position.X);
@@ -38,21 +54,61 @@ void Mesh::Create(Shader* _shader, std::string _file)
 			m_vertexData.push_back(curMesh.Vertices[j].Normal.Z);
 			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.X);
 			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
+
+			if (loader.LoadedMaterials[0].map_bump != "")
+			{
+				int index = j / 3;
+				m_vertexData.push_back(tangents[index].X);
+				m_vertexData.push_back(tangents[index].Y);
+				m_vertexData.push_back(tangents[index].Z);
+				m_vertexData.push_back(bitangents[index].X);
+				m_vertexData.push_back(bitangents[index].Y);
+				m_vertexData.push_back(bitangents[index].Z);
+			}
 		}
 	}
 
-	std::string diffuseMap = loader.LoadedMaterials[0].map_Kd;
-	const size_t last_slash_idx = diffuseMap.find_last_of("\\/");
-	if (std::string::npos != last_slash_idx)
+	//std::string diffuseMap = loader.LoadedMaterials[0].map_Kd;
+	//const size_t last_slash_idx = diffuseMap.find_last_of("\\/");
+	//if (std::string::npos != last_slash_idx)
+	//{
+	//	diffuseMap.erase(0, last_slash_idx + 1);
+	//}
+
+	//textureDiffuse = Texture();
+	//textureDiffuse.LoadTexture("../Assets/Textures/" + diffuseMap);
+
+	//textureSpecular = Texture();
+	//textureSpecular.LoadTexture("../Assets/Textures/" + diffuseMap);
+
+	textureDiffuse = Texture();
+	if (loader.LoadedMaterials[0].map_Kd != "")
 	{
-		diffuseMap.erase(0, last_slash_idx + 1);
+		textureDiffuse.LoadTexture("../Assets/Textures/" + RemoveFolder(loader.LoadedMaterials[0].map_Kd));
+	}
+	else // backup just for safety
+	{
+		textureDiffuse.LoadTexture("../Assets/Textures/Pattern.png");
 	}
 
-	texture = Texture();
-	texture.LoadTexture("../Assets/Textures/" + diffuseMap);
+	textureSpecular = Texture();
+	if (loader.LoadedMaterials[0].map_Ks != "")
+	{
+		textureSpecular.LoadTexture("../Assets/Textures/" + RemoveFolder(loader.LoadedMaterials[0].map_Ks));
+	}
 
-	texture2 = Texture();
-	texture2.LoadTexture("../Assets/Textures/" + diffuseMap);
+	textureNormal = Texture();
+	if (loader.LoadedMaterials[0].map_bump != "")
+	{
+		enableNormalMaps = true;
+		textureNormal.LoadTexture("../Assets/Textures/" + RemoveFolder(loader.LoadedMaterials[0].map_bump));
+	}
+
+	vertexStride = 8;
+	if (enableNormalMaps)
+	{
+		vertexStride += 6;
+	}
 
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -63,8 +119,8 @@ void Mesh::Cleanup()
 {
 	glDeleteBuffers(1, &vertexBuffer);
 	glDeleteBuffers(1, &indexBuffer);
-	texture.Cleanup();
-	texture2.Cleanup();
+	textureDiffuse.Cleanup();
+	textureSpecular.Cleanup();
 
 	vertexBuffer = 0;
 	indexBuffer = 0;
@@ -86,6 +142,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv)
 	shader->SetMat4("World", world);
 	shader->SetMat4("WVP", _pv * world);
 	shader->SetVec3("CameraPosition", cameraPosition);
+	shader->SetInt("EnableNormalMaps", enableNormalMaps);
 
 	std::vector<Mesh*>& lights = GameController::GetInstance().GetLights();
 	for (int i = 0; i < lights.size(); i++)
@@ -108,8 +165,9 @@ void Mesh::SetShaderVariables(glm::mat4 _pv)
 	
 	// Configure Material
 	shader->SetFloat("material.specularStrength", 8.0f);
-	shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, texture.GetTexture());
-	shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, texture2.GetTexture());
+	shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, textureDiffuse.GetTexture());
+	shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, textureSpecular.GetTexture());
+	shader->SetTextureSampler("material.normalTexture", GL_TEXTURE1, 2, textureNormal.GetTexture());
 }
 
 void Mesh::Render(glm::mat4 _pv)
@@ -122,7 +180,7 @@ void Mesh::Render(glm::mat4 _pv)
 	SetShaderVariables(_pv);
 	BindAttributes();
 
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8);
+	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / vertexStride);
 	glDisableVertexAttribArray(shader->GetAttrVertices());
 	glDisableVertexAttribArray(shader->GetAttrNormals());
 	glDisableVertexAttribArray(shader->GetAttrTexCoords());
@@ -138,14 +196,14 @@ void Mesh::BindAttributes()
 		3			/*size*/,
 		GL_FLOAT	/*type*/,
 		GL_FALSE	/*normalized*/,
-		8 * sizeof(float)			/*stride (8 floats per vertex definition)*/,
+		vertexStride * sizeof(float)			/*stride (8 floats per vertex definition)*/,
 		(void*)0	/*offset*/);
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
 	glEnableVertexAttribArray(shader->GetAttrNormals());
 	glVertexAttribPointer(shader->GetAttrNormals(),
 		3, GL_FLOAT, GL_FALSE,	// size, type, normalized?
-		8 * sizeof(float),		// stride (8 floats per vertex definition)
+		vertexStride * sizeof(float),		// stride (8 floats per vertex definition)
 		(void*)(3 * sizeof(float)) // array buffer offset
 	);
 
@@ -156,9 +214,34 @@ void Mesh::BindAttributes()
 		2,							// size
 		GL_FLOAT,					// type
 		GL_FALSE,					// normalized
-		8 * sizeof(float),			// stride (8 floats per vertex definition)
+		vertexStride * sizeof(float),			// stride (8 floats per vertex definition)
 		(void*)(6 * sizeof(float))	// array buffer offset
 	);
+
+	if (enableNormalMaps)
+	{
+		// 4th Attribute buffer : tangent
+		glEnableVertexAttribArray(shader->GetAttrTangents());
+		glVertexAttribPointer(
+			shader->GetAttrTangents(),
+			3,							// size
+			GL_FLOAT,					// type
+			GL_FALSE,					// normalized
+			vertexStride * sizeof(float),			// stride (8 floats per vertex definition)
+			(void*)(8 * sizeof(float))	// array buffer offset
+		);
+
+		// 5th Attribute buffer : bitangent
+		glEnableVertexAttribArray(shader->GetAttrBitangents());
+		glVertexAttribPointer(
+			shader->GetAttrBitangents(),
+			3,							// size
+			GL_FLOAT,					// type
+			GL_FALSE,					// normalized
+			vertexStride * sizeof(float),			// stride (8 floats per vertex definition)
+			(void*)(11 * sizeof(float))	// array buffer offset
+		);
+	}
 
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
@@ -175,4 +258,33 @@ std::string Mesh::Concat(const std::string& _s1, int _index, const std::string& 
 {
 	std::string index = std::to_string(_index);
 	return (_s1 + index + _s2);
+}
+
+std::string Mesh::RemoveFolder(std::string& _map)
+{
+	const size_t last_slash_idx = _map.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx)
+	{
+		_map.erase(0, last_slash_idx + 1);
+	}
+	return _map;
+}
+
+void Mesh::CalculateTangents(std::vector<objl::Vertex> _vertices, objl::Vector3& _tangent, objl::Vector3& _bitangent)
+{
+	// Calculate tangent/bitangent vectors of both triangles
+	objl::Vector3 edge1 = _vertices[1].Position - _vertices[0].Position;
+	objl::Vector3 edge2 = _vertices[2].Position - _vertices[0].Position;
+	objl::Vector2 deltaUV1 = _vertices[1].TextureCoordinate - _vertices[0].TextureCoordinate;
+	objl::Vector2 deltaUV2 = _vertices[2].TextureCoordinate - _vertices[0].TextureCoordinate;
+
+	float f = 1.0f / (deltaUV1.X * deltaUV2.Y - deltaUV2.X * deltaUV1.Y);
+
+	_tangent.X = f * (deltaUV2.Y * edge1.X - deltaUV1.Y * edge2.X);
+	_tangent.Y = f * (deltaUV2.Y * edge1.Y - deltaUV1.Y * edge2.Y);
+	_tangent.Z = f * (deltaUV2.Y * edge1.Z - deltaUV1.Y * edge2.Z);
+
+	_bitangent.X = f * (-deltaUV2.X * edge1.X + deltaUV1.X * edge2.X);
+	_bitangent.Y = f * (-deltaUV2.X * edge1.Y + deltaUV1.X * edge2.Y);
+	_bitangent.Z = f * (-deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
 }

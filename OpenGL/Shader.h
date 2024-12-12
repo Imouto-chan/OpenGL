@@ -13,9 +13,9 @@ public:
 	GLuint GetAttrVertices() { return attrVertices; }
 	GLuint GetAttrColors() { return attrColors; }
 	GLuint GetAttrNormals() { return attrNormals; }
+	GLuint GetAttrTangents() { return attrTangents; }
+	GLuint GetAttrBitangents() { return attrBitangents; }
 	GLuint GetAttrTexCoords() { return attrTexCoords; }
-	GLuint GetSampler1() { return sampler1; }
-	GLuint GetSampler2() { return sampler2; }
 	GLuint GetAttrWVP() { return attrWVP; }
 
 	void LoadShaders(const char* _vertexFilePath, const char* _fragmentFilePath);
@@ -24,6 +24,7 @@ public:
 	void SetMat4(const char* _name, glm::mat4 _value);
 	void SetFloat(const char* _name, float _value);
 	void SetTextureSampler(const char* _name, GLuint _texUint, int _texUintId, int _value);
+	void SetInt(const char* _name, int _value);
 
 private:
 	void CreateShaderProgram(const char* _vertexFilePath, const char* _fragmentFilePath);
@@ -34,10 +35,10 @@ private:
 	GLuint programID = 0; // ID of out shader program
 	GLuint attrVertices = 0; // Handle for the attribute vertex buffer
 	GLuint attrColors = 0; // Handle for the attribute color
-	GLuint attrNormals = 0; // Handle for the attribute Normal
+	GLuint attrNormals = 0; // Handle for the attribute normal
+	GLuint attrTangents = 0; // Handle for the attribute tangents
+	GLuint attrBitangents = 0; // Handle for the attribute bitangents
 	GLuint attrTexCoords = 0; // Handle for the attribute tex coords
-	GLuint sampler1 = 0; // Handle for the attribute sampler 1
-	GLuint sampler2 = 0; // Handle for the attribute sampler 2
 	GLuint attrWVP = 0;
 	GLint result = GL_FALSE;
 	int infoLogLength = 0;

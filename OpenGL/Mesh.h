@@ -3,6 +3,7 @@
 
 #include "StandardIncludes.h"
 #include "Texture.h"
+#include "OBJ_Loader.h"
 
 class Shader;
 
@@ -33,15 +34,21 @@ private:
 	void SetShaderVariables(glm::mat4 _pv);
 	void BindAttributes();
 	std::string Concat(const std::string& _s1, int _index, const std::string& _s2);
+	std::string RemoveFolder(std::string& _map);
+	void CalculateTangents(std::vector<objl::Vertex> _vertices, objl::Vector3& _tangent, objl::Vector3& _bitangent);
 
 private:
 	Shader* shader = nullptr;
-	Texture texture {};
-	Texture texture2{};
+	Texture textureDiffuse {};
+	Texture textureSpecular {};
+	Texture textureNormal {};
 	GLuint vertexBuffer;
 	GLuint indexBuffer = 0;
 	std::vector<GLfloat> m_vertexData;
 	std::vector<GLubyte> m_indexData;
+	bool enableNormalMaps = false;
+
+	int vertexStride = 0;
 
 	glm::mat4 world = glm::mat4(1);
 	glm::vec3 position { 0.0f, 0.0f, 0.0f };

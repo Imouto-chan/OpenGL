@@ -20,7 +20,7 @@ void GameController::Initialize()
 	srand(time(0));
 
 	camera = Camera(WindowController::GetInstance().GetResolution());
-	camera.LookAt({ 0, 0, 0 }, { 0,0,0 }, { 0,1,0 });
+	camera.LookAt({ 2, 2, 2 }, { 0,0,0 }, { 0,1,0 });
 	//glfwSetWindowSize(WindowController::GetInstance().GetWindow(), resolutions[0].width, resolutions[0].height);
 }
 
@@ -47,27 +47,24 @@ void GameController::RunGame()
 	
 	Mesh* light = new Mesh();
 	light->Create(&shaderColor, "../Assets/Models/Sphere.obj");
-	light->SetPosition({ 5.0f, 0.0f, 1.0f });
+	light->SetPosition({ 0.0f, 0.8f, 1.0f });
 	light->SetColor({ 1.0f, 1.0f, 1.0f });
 	light->SetScale({ 0.1f, 0.1f, 0.1f });
 	lights.push_back(light);
 
-	Mesh* box = new Mesh();
-	box->Create(&shaderDiffuse, "../Assets/Models/Cube.obj");
-	box->SetCameraPosition(camera.GetPosition());
-	box->SetScale({ 1.0f, 1.0f, 1.0f });
-	box->SetPosition({5.0f, 0.0f, 5.0f});
-	meshBoxes.push_back(box);box = new Mesh();
+	Mesh* mesh = new Mesh();
+	mesh->Create(&shaderDiffuse, "../Assets/Models/Fighter.obj");
+	mesh->SetCameraPosition(camera.GetPosition());
+	mesh->SetPosition({0.0f, 0.0f, 0.0f});
+	mesh->SetScale({ 0.002f, 0.002f, 0.002f });
+	meshes.push_back(mesh);
 
-	box = new Mesh();
+	/*box = new Mesh();
 	box->Create(&shaderDiffuse, "../Assets/Models/monkey.obj");
 	box->SetCameraPosition(camera.GetPosition());
 	box->SetScale({ 1.0f, 1.0f, 1.0f });
 	box->SetPosition({5.0f, 0.0f, 0.0f});
 	meshBoxes.push_back(box);box = new Mesh();
-
-	Font* arialFont = new Font();
-	arialFont->Create(&shaderFont, "../Assets/Fonts/arial.ttf", 100);
 
 	skybox = new Skybox();
 	skybox->Create(&shaderSkybox, "../Assets/Models/Skybox.obj",
@@ -76,7 +73,10 @@ void GameController::RunGame()
 		"../Assets/Textures/Skybox/top.jpg",
 		"../Assets/Textures/Skybox/bottom.jpg",
 		"../Assets/Textures/Skybox/front.jpg",
-		"../Assets/Textures/Skybox/back.jpg" });
+		"../Assets/Textures/Skybox/back.jpg" });*/
+
+	Font* arialFont = new Font();
+	arialFont->Create(&shaderFont, "../Assets/Fonts/arial.ttf", 100);
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
@@ -98,9 +98,9 @@ void GameController::RunGame()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and dept buffer
 
-		camera.Rotate();
+		/*camera.Rotate();
 		glm::mat4 view = glm::mat4(glm::mat3(camera.GetView()));
-		skybox->Render(camera.GetProjection() * view);
+		skybox->Render(camera.GetProjection() * view);*/
 
 		for (auto light : lights)
 		{
@@ -109,11 +109,11 @@ void GameController::RunGame()
 		
 		// Note we are now using a pointer so we are not doing a shallow copy, we could also
 		// use a reference if we were not on the Heap
-		glm::vec3 rotationSpeed = { 0.0f, 0.005f, 0.0f };
-		for (auto box : meshBoxes)
+		glm::vec3 rotationSpeed = { 0.0f, 0.05f, 0.0f };
+		for (auto mesh : meshes)
 		{
 			//box->SetRotation(box->GetRotation() + rotationSpeed);
-			box->Render(camera.GetProjection() * camera.GetView());
+			mesh->Render(camera.GetProjection() * camera.GetView());
 		}
 
 		arialFont->RenderText("Hello World", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
@@ -129,14 +129,15 @@ void GameController::RunGame()
 		delete light;
 	}
 	lights.clear();
-	for (auto box : meshBoxes)
+	for (auto mesh : meshes)
 	{
-		box->Cleanup();
-		delete box;
+		mesh->Cleanup();
+		delete mesh;
 	}
-	meshBoxes.clear();
+	meshes.clear();
 
 	shaderFont.Cleanup();
 	shaderDiffuse.Cleanup();
 	shaderColor.Cleanup();
+	shaderSkybox.Cleanup();
 }
