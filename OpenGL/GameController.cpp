@@ -71,13 +71,21 @@ void GameController::RunGame()
 	//mesh->SetScale({ 0.002f, 0.002f, 0.002f });
 	//meshes.push_back(mesh);
 
-	// Cube
+	// Fighter ASE
 	mesh = new Mesh();
-	mesh->Create(&shaderDiffuse, "../Assets/Models/Cube.obj", 1000);
+	mesh->Create(&shaderDiffuse, "../Assets/Models/Fighter.ase");
 	mesh->SetCameraPosition(camera.GetPosition());
-	mesh->SetScale({ 0.1f, 0.1f, 0.1f });
 	mesh->SetPosition({0.0f, 0.0f, 0.0f});
+	mesh->SetScale({ 0.002f, 0.002f, 0.002f });
 	meshes.push_back(mesh);
+
+	// Cube
+	//mesh = new Mesh();
+	//mesh->Create(&shaderDiffuse, "../Assets/Models/Cube.obj", 1000);
+	//mesh->SetCameraPosition(camera.GetPosition());
+	//mesh->SetScale({ 0.1f, 0.1f, 0.1f });
+	//mesh->SetPosition({0.0f, 0.0f, 0.0f});
+	//meshes.push_back(mesh);
 
 	/*box = new Mesh();
 	box->Create(&shaderDiffuse, "../Assets/Models/monkey.obj");
